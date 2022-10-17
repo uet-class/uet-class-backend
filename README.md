@@ -27,3 +27,7 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
   ```
 
   This will start the server at `http://localhost:8080`.
+
+## To-do
+
+- Update Github Actions to use GCP Artifact Registry instead of Docker Hub.
