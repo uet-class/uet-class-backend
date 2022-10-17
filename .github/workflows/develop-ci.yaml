@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Authenticate with Docker Hub
-        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login docker.io --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        run: docker login docker.io --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build Docker image
         run: |
