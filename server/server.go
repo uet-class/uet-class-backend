@@ -12,5 +12,5 @@ func Init() {
 
 	// router.GET("/users", controllers.)
 
-	router.Run(config["port"])
+	router.Run(config.GetString("SERVER_PORT"))
 }

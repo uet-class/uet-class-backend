@@ -3,6 +3,8 @@ name: Go
 on:
   push:
     branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
 
 env:
   REGISTRY_URL: thainm
@@ -22,8 +24,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest .
-          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_SHA
+          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:develop-latest .
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:develop-$GITHUB_SHA
 
       - name: Push the built image to Docker Hub
         run: |
