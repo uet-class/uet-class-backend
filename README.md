@@ -40,10 +40,12 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
 | `DB_PASSWORD` | Password of the user to connect |
 | `DB_NAME`     | Database name                   |
 
-These variables should be defined in a YAML file.
+These variables should be defined in a YAML file, named `develop.yaml`.
+
 Example: 
 
 ``` yaml
+# develop.yaml
 SERVER_HOST: localhost
 SERVER_PORT: :8080  # Note that there is a colon ':' before the port number
 DB_HOST: localhost
