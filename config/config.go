@@ -1,20 +1,24 @@
 package config
 
-const Host = "localhost"
-const Port = ":8080"
-const DatabaseHost = "localhost"
-const DatabasePort = "5432"
+import (
+	"log"
 
-var config map[string]string
+	"github.com/spf13/viper"
+)
 
-func Init() {
-	config = make(map[string]string)
-	config["host"] = Host
-	config["port"] = Port
-	config["db_host"] = DatabaseHost
-	config["db_port"] = DatabasePort
+var config *viper.Viper
+
+func Init(environment string) {
+	config = viper.New()
+	config.SetConfigName(environment)
+	config.SetConfigType("yaml")
+	config.AddConfigPath("config/")
+
+	if err := config.ReadInConfig(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func GetConfig() map[string]string {
+func GetConfig() *viper.Viper {
 	return config
 }
