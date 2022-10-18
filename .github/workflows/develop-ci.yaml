@@ -3,6 +3,9 @@ name: Go
 on:
   push:
     branches: ["develop"]
+  pull_request:
+    types:
+      - "closed"
 
 env:
   REGISTRY_URL: thainm
@@ -12,6 +15,7 @@ env:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
