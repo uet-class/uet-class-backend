@@ -28,6 +28,30 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
 
   This will start the server at `http://localhost:8080`.
 
+## Environment variables
+
+| Variables     | Usage                           |
+| ------------- | ------------------------------- |
+| `SERVER_HOST` | Server hostname                 |
+| `SERVER_PORT` | Server port number              |
+| `DB_HOST`     | Database hostname               |
+| `DB_PORT`     | Database port number            |
+| `DB_USER`     | Database user to connect        |
+| `DB_PASSWORD` | Password of the user to connect |
+| `DB_NAME`     | Database name                   |
+
+These variables should be defined in a YAML file.
+Example: 
+
+``` yaml
+SERVER_HOST: localhost
+SERVER_PORT: :8080  # Note that there is a colon ':' before the port number
+DB_HOST: localhost
+DB_PORT: 5432
+DB_USER: user
+DB_PASSWORD: passwd
+DB_NAME: db_name
+```
 ## To-do
 
 - Update Github Actions to use GCP Artifact Registry instead of Docker Hub.
