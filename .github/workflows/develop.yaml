@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY_URL: thainm
   IMAGE_NAME: uet-class-backend
+  BRANCH_NAME: develop
 
 jobs:
   build:
@@ -27,13 +28,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME-latest .
-          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME-latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME-$GITHUB_SHA
+          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest .
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
       - name: Push the built image to Docker Hub
         run: |
-          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME-latest
-          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME-$GITHUB_SHA
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
   deploy:
     needs: build
