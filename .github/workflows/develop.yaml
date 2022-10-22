@@ -17,7 +17,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    if: $GITHUB_REF_NAME == 'develop'
     steps:
       - uses: actions/checkout@v3
 
