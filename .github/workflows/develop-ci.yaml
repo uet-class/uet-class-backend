@@ -41,5 +41,8 @@ jobs:
     runs-on: ubuntu-20.04
     container: google/cloud-sdk
     steps:
+      - name: Check status
+        run: ls -la
+
       - name: Check gcloud SDK status
         run: gcloud version
