@@ -1,0 +1,48 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - "develop"
+      - "feature/cicd"
+  pull_request:
+    branches:
+      - "develop"
+
+env:
+  REGISTRY_URL: thainm
+  IMAGE_NAME: uet-class-backend
+  COMMIT_TAG: develop-$GITHUB_SHA
+  LATEST_TAG: develop-latest
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test status
+        run: ls -la
+
+      - name: Authenticate with Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login docker.io --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$LATEST_TAG .
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$COMMIT_TAG
+
+      - name: Push the built image to Docker Hub
+        run: |
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$LATEST_TAG
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$COMMIT_TAG
+  deploy:
+    needs: build
+    runs-on: ubuntu-20.04
+    container: google/cloud-sdk
+    steps:
+      - name: Check status
+        run: ls -la
+
+      - name: Check gcloud SDK status
+        run: gcloud version
