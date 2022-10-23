@@ -16,6 +16,11 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
   cd uet-class-backend
   ```
 
+- Install dependencies:
+  ```bash
+  go install
+  ```
+
 - Build the source code:
   ``` bash
   go build main.go
@@ -41,7 +46,7 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
 | `DB_NAME`     | Database name                   |
 
 These variables should be defined in a YAML file, named `develop.yaml`, and placed in the `config` directory.
-
+For the real configuration, please refer to [configuration-management](https://github.com/uet-class/configuration-management) repository.
 Example: 
 
 ``` yaml
