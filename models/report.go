@@ -1,13 +1,11 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type Report struct {
-	gorm.Model
-	ID             int
+	ID             int `gorm:"primaryKey"`
 	ReportTypeID   int
 	reportObjectID int
 	CreatedAt      time.Time

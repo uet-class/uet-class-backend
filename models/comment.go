@@ -1,13 +1,11 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type Comment struct {
-	gorm.Model
-	ID        int
+	ID        int `gorm:"primaryKey"`
 	CreatorID int
 	PostID    int
 	Content   string
