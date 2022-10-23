@@ -13,6 +13,8 @@ env:
   REGISTRY_URL: thainm
   IMAGE_NAME: uet-class-backend
   BRANCH_NAME: develop
+  GCP_DEVELOP_SERVER_HOST: 34.87.150.132
+  GCP_PROJECT_ZONE: asia-southeast1-b
 
 jobs:
   build:
@@ -52,4 +54,4 @@ jobs:
 
       - name: SSH to the remote server and pull new images
         run: |
-          gcloud compute ssh ${{ secrets.GCP_DEVELOP_SERVER_HOST }} --zone=${{ secrets.GCP_PROJECT_ZONE }} --command="ls -la"
+          gcloud compute ssh ${{ env.GCP_DEVELOP_SERVER_HOST }} --zone=${{ env.GCP_PROJECT_ZONE }} --command="ls -la"
