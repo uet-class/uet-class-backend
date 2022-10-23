@@ -1,7 +1,9 @@
 package models
 
+import "gorm.io/gorm"
+
 type Admin struct {
-	ID       int `gorm:"primaryKey"`
+	gorm.Model
 	Email    string
 	Password string
 }
