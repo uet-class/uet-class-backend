@@ -49,3 +49,7 @@ jobs:
           echo "${{ secrets.GA_GCP_SERVICE_ACCOUNT_KEY }}" | base64 -d > github-actions-sa.json
           cat github-actions-sa.json
           gcloud auth activate-service-account ${{ secrets.GA_GCP_SERVICE_ACCOUNT_EMAIL }} --key-file=github-actions-sa.json --project=${{ secrets.GA_GCP_PROJECT_ID }}
+
+      - name: SSH to the remote server and pull new images
+        run: |
+          gcloud compute ssh ${{ secrets.GCP_DEVELOP_SERVER_HOST }} --zone=${{ secrets.GCP_PROJECT_ZONE }} --command="ls -la"
