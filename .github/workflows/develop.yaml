@@ -20,16 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Test status
-        run: ls -la
-
       - name: Authenticate with Docker Hub
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login docker.io --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build Docker image
         run: |
           docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest .
-          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
       - name: Push the built image to Docker Hub
         run: |
@@ -37,7 +34,7 @@ jobs:
           docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
   deploy:
-    needs: build
+    # needs: build
     runs-on: ubuntu-20.04
     container: google/cloud-sdk
     steps:
@@ -46,3 +43,9 @@ jobs:
 
       - name: Check gcloud SDK status
         run: gcloud version
+
+      - name: Authenticate with Google Cloud Platform
+        run: |
+          echo "${{ secrets.GA_GCP_SERVICE_ACCOUNT_KEY }}" | base64 -d > github-actions-sa.json
+          cat github-actions-sa.json
+          gcloud auth activate-service-account ${{ secrets.GA_GCP_SERVICE_ACCOUNT_EMAIL }} --key-file=github-actions-sa.json --project=${{ secrets.GA_GCP_PROJECT_ID }}
