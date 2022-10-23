@@ -34,7 +34,7 @@ jobs:
           docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
   deploy:
-    # needs: build
+    needs: build
     runs-on: ubuntu-20.04
     container: google/cloud-sdk
     steps:
