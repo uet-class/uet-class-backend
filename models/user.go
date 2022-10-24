@@ -14,7 +14,7 @@ import (
 // User has and belongs to many Class, teacherID and studentID are the foreign keys, reference to id
 type User struct {
 	gorm.Model
-	Email       string
+	Email       string `gorm:"unique"`
 	Password    string
 	FullName    string
 	DateOfBirth time.Time
