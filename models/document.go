@@ -6,8 +6,8 @@ import (
 
 type Document struct {
 	gorm.Model
-	CreatorID    int
-	AttachmentID int
-	ClassID      int
-	Title        string
+	CreatorID  int
+	Attachment []Attachment	`gorm:"foreignKey:DocumentID"`
+	ClassID    int
+	Title      string
 }
