@@ -47,7 +47,7 @@ jobs:
         run: chmod 400 github-actions.pem
 
       - name: Deploying Docker container
-        run: ssh -i github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; ls -la"
+        run: ssh -vi github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; ls -la"
 
       - name: Checkout new repo version
         run: ssh -i github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; git pull origin main"
