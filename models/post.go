@@ -7,7 +7,8 @@ import (
 type Post struct {
 	gorm.Model
 	CreatorID    int
-	AttachmentID []Attachment	`gorm:"foreignKey:PostID"`
+	AttachmentID []Attachment `gorm:"foreignKey:PostID"`
+	Comment      []Comment    `gorm:"foreignKey:PostID"`
 	ClassID      int
 	Content      string
 	Title        string
