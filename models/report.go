@@ -8,7 +8,7 @@ import (
 type Report struct {
 	gorm.Model
 	ReportTypeID   int
-	reportObjectID int
+	ReportObjectID int
 	Message        string
 	ReporterID     int
 	ReportType     ReportType
