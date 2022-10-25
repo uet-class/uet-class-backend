@@ -48,8 +48,7 @@ jobs:
 
       - name: Fixing SSH issue
         run: |
-          rm /dev/tty
-          ln -s /dev/ttyS0 /dev/tty
+          ls /dev
 
       - name: Deploying Docker container
         run: ssh -vi github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; ls -la"
