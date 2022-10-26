@@ -1,10 +1,19 @@
 package controllers
 
 import (
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/models"
 	"gorm.io/gorm"
-	"time"
 )
+
+type UserController struct{}
+
+func (u UserController) GetUser(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
 
 func parseTime(t string) time.Time {
 	result, err := time.Parse("02-01-2006", t)
@@ -37,10 +46,4 @@ func BatchInsertData(db *gorm.DB) {
 	}
 
 	db.Create(&users)
-}
-
-func MigrateModel(db *gorm.DB) {
-	db.AutoMigrate(&models.User{}, &models.Report{}, &models.ReportType{}, &models.Class{},
-		&models.Post{}, &models.Document{}, &models.Assignment{}, &models.Submission{}, &models.Assignment{},
-		&models.Comment{}, &models.Attachment{})
 }
