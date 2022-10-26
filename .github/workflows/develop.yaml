@@ -25,6 +25,7 @@ jobs:
 
       - name: Building Docker image
         run: |
+          docker run --rm -v "$PWD":/usr/src/uc-backend -w /usr/src/uc-backend golang:1.19 go build -v
           docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest .
           docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
@@ -34,7 +35,7 @@ jobs:
           docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
 
   deploy:
-    # needs: build
+    needs: build
     runs-on: ubuntu-20.04
     steps:
       - name: Check status
@@ -45,10 +46,6 @@ jobs:
 
       - name: Changing permission of the private key
         run: chmod 400 github-actions.pem
-
-      - name: Fixing SSH issue
-        run: |
-          ls /dev
 
       - name: Deploying Docker container
         run: ssh -o StrictHostKeyChecking=no -vi github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; ls -la"
