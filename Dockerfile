@@ -2,6 +2,6 @@ FROM golang:1.19
 
 WORKDIR /app
 
-COPY ./uc-backend /app/
+COPY ./uet-class-backend /app/
 
-CMD [ "./uc-backend" ]
+CMD [ "./uet-class-backend" ]
