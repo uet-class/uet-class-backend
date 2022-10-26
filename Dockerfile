@@ -2,6 +2,6 @@ FROM golang:1.19
 
 WORKDIR /app
 
-COPY ./main /app/
+COPY ./uc-backend /app/
 
-CMD [ "./main" ]
+CMD [ "./uc-backend" ]
