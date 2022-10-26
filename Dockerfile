@@ -2,10 +2,6 @@ FROM golang:1.19
 
 WORKDIR /app
 
-COPY . /app/
+COPY ./uet-class-backend /app/
 
-RUN go install
-
-RUN go build .
-
-CMD [ "./main" ]
+CMD [ "./uet-class-backend" ]
