@@ -25,6 +25,7 @@ func Init() {
 		auth := new(controllers.AuthController)
 		authRouter.POST("/signup", auth.SignUp)
 		authRouter.POST("/signin", auth.SignIn)
+		authRouter.POST("/signout", auth.SignOut)
 	}
 
 	userRouter := router.Group("user")
