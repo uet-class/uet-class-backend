@@ -67,3 +67,10 @@ func (auth AuthController) SignIn(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"error": "Username or password is incorrect"})
 }
+
+func (auth AuthController) SignOut(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+
+	c.JSON(http.StatusOK, session.Get("authorized"))
+}
