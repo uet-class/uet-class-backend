@@ -1,10 +1,11 @@
-package db
+package database
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/uet-class/uet-class-backend/config"
+	"github.com/uet-class/uet-class-backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,6 +23,21 @@ func Init() {
 		config.GetString("DB_NAME"))
 
 	if db, err = gorm.Open(postgres.Open(datasource), &gorm.Config{}); err != nil {
+		log.Fatal(err)
+	}
+
+	if err = db.AutoMigrate(
+		&models.User{},
+		&models.Report{},
+		&models.ReportType{},
+		&models.Class{},
+		&models.Post{},
+		&models.Document{},
+		&models.Assignment{},
+		&models.Submission{},
+		&models.Assignment{},
+		&models.Comment{},
+		&models.Attachment{}); err != nil {
 		log.Fatal(err)
 	}
 }
