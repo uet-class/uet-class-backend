@@ -1,6 +1,8 @@
 package server
 
 import (
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/controllers"
@@ -14,6 +16,7 @@ func Init() {
 	config := config.GetConfig()
 
 	router := gin.Default()
+	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
 	router.GET("/", getHome)
 
@@ -21,6 +24,7 @@ func Init() {
 	{
 		auth := new(controllers.AuthController)
 		authRouter.POST("/signup", auth.SignUp)
+		authRouter.POST("/signin", auth.SignIn)
 	}
 
 	userRouter := router.Group("user")

@@ -10,6 +10,10 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/gin-contrib/sessions v0.0.5 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
