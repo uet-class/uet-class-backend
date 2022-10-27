@@ -17,6 +17,12 @@ func Init() {
 
 	router.GET("/", getHome)
 
+	authRouter := router.Group("auth")
+	{
+		auth := new(controllers.AuthController)
+		authRouter.POST("/signup", auth.SignUp)
+	}
+
 	userRouter := router.Group("user")
 	{
 		user := new(controllers.UserController)
