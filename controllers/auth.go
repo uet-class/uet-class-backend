@@ -2,16 +2,26 @@ package controllers
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type AuthController struct{}
+
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 
 func (auth AuthController) SignUp(c *gin.Context) {
 	db := database.GetDatabase()
@@ -20,23 +30,25 @@ func (auth AuthController) SignUp(c *gin.Context) {
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorHandler(err, c)
 		return
 	}
 
-	err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		if reqUser.Password, err = hashPassword(reqUser.Password); err != nil {
+			ErrorHandler(err, c)
+			return
+		}
 		if err := db.Create(&reqUser).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			ErrorHandler(err, c)
 			return
 		}
 	} else {
-		c.JSON(http.StatusOK, gin.H{"error": "User already exists!"})
+		MessageHandler("User is already exists", c)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": reqUser})
+	MessageHandler("Success", c)
 }
 
 func (auth AuthController) SignIn(c *gin.Context) {
@@ -47,30 +59,27 @@ func (auth AuthController) SignIn(c *gin.Context) {
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorHandler(err, c)
 		return
 	}
 
-	err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error
-
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		if matchedUser.Password == reqUser.Password {
+	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
+		if checkPasswordHash(reqUser.Password, matchedUser.Password) {
 			session.Set("authorized", true)
 			if err := session.Save(); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+				ErrorHandler(err, c)
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"Is authorized": true})
+			MessageHandler("Success", c)
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": "Username or password is incorrect"})
+	MessageHandler("Username or password is incorrect", c)
 }
 
 func (auth AuthController) SignOut(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
-
-	c.JSON(http.StatusOK, session.Get("authorized"))
+	MessageHandler(session.Get("authorized"), c)
 }
