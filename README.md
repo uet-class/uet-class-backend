@@ -60,6 +60,3 @@ DB_PASSWORD: passwd
 DB_NAME: db_name
 ```
 ## To-do
-
-- Update Github Actions to use GCP Artifact Registry instead of Docker Hub.
-- Add Actions to test the APIs (test jobs)
