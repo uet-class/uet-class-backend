@@ -59,4 +59,12 @@ DB_USER: user
 DB_PASSWORD: passwd
 DB_NAME: db_name
 ```
+
+## Seeding data
+
+The seeding script is placed in `seed/` directory of this repo.
+
+``` bash
+go run seed/seed.go
+```
 ## To-do
