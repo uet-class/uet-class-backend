@@ -13,14 +13,15 @@ import (
 var db *gorm.DB
 var err error
 
-func Init() {
+func InitPostgres() {
 	config := config.GetConfig()
+
 	datasource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
-		config.GetString("DB_HOST"),
-		config.GetString("DB_PORT"),
-		config.GetString("DB_USER"),
-		config.GetString("DB_PASSWORD"),
-		config.GetString("DB_NAME"))
+		config.GetString("POSTGRES_HOST"),
+		config.GetString("POSTGRES_PORT"),
+		config.GetString("POSTGRES_USER"),
+		config.GetString("POSTGRES_PASSWORD"),
+		config.GetString("POSTGRES_DATABASE"))
 
 	if db, err = gorm.Open(postgres.Open(datasource), &gorm.Config{}); err != nil {
 		log.Fatal(err)
