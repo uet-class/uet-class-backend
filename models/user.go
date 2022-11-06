@@ -18,7 +18,7 @@ type User struct {
 	Email        string       `gorm:"unique;not null"`
 	Password     string       `gorm:"not null"`
 	FullName     string       `gorm:"-"`
-	DateOfBirth  time.Time    `gorm:"-"`
+	DateOfBirth  time.Time    `gorm:"-"`            
 	AvatarUrl    string       `gorm:"-"`
 	PhoneNumber  string       `gorm:"-"`
 	ClassName    string       `gorm:"-"`
