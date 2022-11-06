@@ -1,27 +1,13 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
 func AbortWithError(c *gin.Context, code int, message interface{}) {
-  c.AbortWithStatusJSON(code, gin.H{"error": message})
+	c.AbortWithStatusJSON(code, gin.H{"error": message})
 }
 
-func InternalServerErrorHandler(err error, c *gin.Context) {
-	c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-}
-
-func UnauthorizedErrorHandler(err error, c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, gin.H{"error": err})
-}
-
-func MessageHandler(message interface{}, c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": message})
-}
-
-func StatusHandler(status int, c *gin.Context) {
-	c.JSON(status, gin.H{"status": status})
+func ResponseHandler(c *gin.Context, code int, message interface{}) {
+	c.JSON(code, gin.H{"message": message})
 }
