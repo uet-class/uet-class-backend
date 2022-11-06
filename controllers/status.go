@@ -6,6 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func AbortWithError(c *gin.Context, code int, message interface{}) {
+  c.AbortWithStatusJSON(code, gin.H{"error": message})
+}
+
 func InternalServerErrorHandler(err error, c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 }

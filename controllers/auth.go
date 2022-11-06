@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -90,20 +91,22 @@ func (auth AuthController) SignIn(c *gin.Context) {
 }
 
 func (auth AuthController) SignOut(c *gin.Context) {
-	var reqUser models.User
+	rdb := database.GetRedis()
 
-	if err := c.BindJSON(&reqUser); err != nil {
+	reqSessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			UnauthorizedErrorHandler(err, c)
+			return
+		}
 		InternalServerErrorHandler(err, c)
 		return
 	}
 
-	rdb := database.GetRedis()
-
-	result, err := rdb.Get(c, reqUser.Email).Result()
+	_, err = rdb.Del(database.GetRedisContext(), reqSessionId).Result()
 	if err != nil {
 		InternalServerErrorHandler(err, c)
 	}
 
-	print(result)
 	MessageHandler("Succeed", c)
 }

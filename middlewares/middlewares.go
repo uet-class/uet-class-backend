@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/go-redis/redis/v8"
@@ -15,33 +14,27 @@ import (
 var ctx context.Context = context.Background()
 
 func AuthRequired(c *gin.Context) {
-	fmt.Println("authorizing")
 	rdb := database.GetRedis()
 
 	reqSessionId, err := c.Cookie("sessionId")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			fmt.Println("no cookies")
-			controllers.UnauthorizedErrorHandler(err, c)
+			controllers.AbortWithError(c, http.StatusUnauthorized, "Cookie not found")
 			return
 		}
-		fmt.Println("server is dead")
-		controllers.InternalServerErrorHandler(err, c)
+		controllers.AbortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	fmt.Println(reqSessionId)
-
-	isAuthorized, err := rdb.Get(ctx, reqSessionId).Result()
+	_, err = rdb.Get(ctx, reqSessionId).Result()
 	if err != nil {
 		if err == redis.Nil {
-			controllers.UnauthorizedErrorHandler(err, c)
+			controllers.AbortWithError(c, http.StatusUnauthorized, "Session not found")
 			return
 		}
-		controllers.InternalServerErrorHandler(err, c)
+		controllers.AbortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	fmt.Println(isAuthorized)
 	c.Next()
 }
