@@ -66,18 +66,19 @@ func (auth AuthController) SignIn(c *gin.Context) {
 		return
 	}
 
+	// Check if user exists
 	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		if checkPasswordHash(reqUser.Password, matchedUser.Password) {
+			// Generate new session
 			sessionId := uuid.NewString()
-
 			sessionDuration, err := time.ParseDuration("3h")
 			if err != nil {
 				ResponseHandler(c, http.StatusInternalServerError, err)
 			}
 
+			// Store and send the session cookie back to the client
 			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "uetclass-dev.duckdns.org", false, true)
-
-			err = rdb.Set(database.GetRedisContext(), sessionId, reqUser.Email, sessionDuration).Err()
+			err = rdb.Set(database.GetRedisContext(), sessionId, matchedUser.ID, sessionDuration).Err()
 			if err != nil {
 				ResponseHandler(c, http.StatusInternalServerError, err)
 				return
