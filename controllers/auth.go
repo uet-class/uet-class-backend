@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
+	"time"
 
-	"github.com/gin-contrib/sessions"
+	"github.com/google/uuid"
+
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
@@ -30,21 +33,21 @@ func (auth AuthController) SignUp(c *gin.Context) {
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		ErrorHandler(err, c)
+		InternalServerErrorHandler(err, c)
 		return
 	}
 
 	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		if reqUser.Password, err = hashPassword(reqUser.Password); err != nil {
-			ErrorHandler(err, c)
+			InternalServerErrorHandler(err, c)
 			return
 		}
 		if err := db.Create(&reqUser).Error; err != nil {
-			ErrorHandler(err, c)
+			InternalServerErrorHandler(err, c)
 			return
 		}
 	} else {
-		MessageHandler("User is already exists", c)
+		MessageHandler("User already exists", c)
 		return
 	}
 
@@ -52,34 +55,58 @@ func (auth AuthController) SignUp(c *gin.Context) {
 }
 
 func (auth AuthController) SignIn(c *gin.Context) {
-	session := sessions.Default(c)
 	db := database.GetDatabase()
+	rdb := database.GetRedis()
 
 	var reqUser models.User
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		ErrorHandler(err, c)
+		InternalServerErrorHandler(err, c)
 		return
 	}
 
 	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		if checkPasswordHash(reqUser.Password, matchedUser.Password) {
-			session.Set("authorized", true)
-			if err := session.Save(); err != nil {
-				ErrorHandler(err, c)
+			sessionId := uuid.NewString()
+
+			sessionDuration, err := time.ParseDuration("3h")
+			if err != nil {
+				InternalServerErrorHandler(err, c)
+			}
+
+			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "uetclass-dev.duckdns.org", false, true)
+
+			err = rdb.Set(database.GetRedisContext(), sessionId, "authorized", sessionDuration).Err()
+			if err != nil {
+				InternalServerErrorHandler(err, c)
 				return
 			}
-			MessageHandler("Success", c)
+
+			MessageHandler("Sign in successfully", c)
 			return
 		}
 	}
-
 	MessageHandler("Username or password is incorrect", c)
 }
 
 func (auth AuthController) SignOut(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Clear()
-	MessageHandler(session.Get("authorized"), c)
+	rdb := database.GetRedis()
+
+	reqSessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			UnauthorizedErrorHandler(err, c)
+			return
+		}
+		InternalServerErrorHandler(err, c)
+		return
+	}
+
+	_, err = rdb.Del(database.GetRedisContext(), reqSessionId).Result()
+	if err != nil {
+		InternalServerErrorHandler(err, c)
+	}
+
+	MessageHandler("Succeed", c)
 }

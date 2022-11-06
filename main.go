@@ -8,6 +8,7 @@ import (
 
 func main() {
 	config.Init("develop")
-	database.Init()
+	database.InitPostgres()
+	database.InitRedis()
 	server.Init()
 }

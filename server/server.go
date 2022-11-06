@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/controllers"
+	"github.com/uet-class/uet-class-backend/middlewares"
 )
 
 func getHome(c *gin.Context) {
@@ -25,10 +26,10 @@ func Init() {
 		auth := new(controllers.AuthController)
 		authRouter.POST("/signup", auth.SignUp)
 		authRouter.POST("/signin", auth.SignIn)
-		authRouter.POST("/signout", auth.SignOut)
+		authRouter.POST("/signout", middlewares.AuthRequired, auth.SignOut)
 	}
 
-	userRouter := router.Group("user")
+	userRouter := router.Group("user").Use(middlewares.AuthRequired)
 	{
 		user := new(controllers.UserController)
 		userRouter.GET("/:id", user.GetUser)
