@@ -35,6 +35,5 @@ func AuthRequired(c *gin.Context) {
 		controllers.AbortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
-
 	c.Next()
 }

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +16,34 @@ type ClassController struct{}
 func (class ClassController) CreateClass(c *gin.Context) {
 	db := database.GetDatabase()
 
-	var reqClass models.Class
+	sessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
 
+	userId, err := getUserIdBySessionId(sessionId)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	matchedUser, err := getUserByUserId(userId)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	var reqClass models.Class
 	if err := c.BindJSON(&reqClass); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
 	}
+	reqClass.TeacherID = append(reqClass.TeacherID, *matchedUser)
+
+	fmt.Println("Class: ", reqClass)
+	fmt.Println("User: ", matchedUser)
+
 	if err := db.Create(&reqClass).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
