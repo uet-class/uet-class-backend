@@ -50,7 +50,6 @@ func (auth AuthController) SignUp(c *gin.Context) {
 		ResponseHandler(c, http.StatusConflict, "User already exists")
 		return
 	}
-
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
@@ -74,8 +73,8 @@ func (auth AuthController) SignIn(c *gin.Context) {
 			sessionDuration, err := time.ParseDuration("3h")
 			if err != nil {
 				ResponseHandler(c, http.StatusInternalServerError, err)
+				return
 			}
-
 			// Store and send the session cookie back to the client
 			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "uetclass-dev.duckdns.org", false, true)
 			err = rdb.Set(database.GetRedisContext(), sessionId, matchedUser.ID, sessionDuration).Err()
@@ -83,7 +82,6 @@ func (auth AuthController) SignIn(c *gin.Context) {
 				ResponseHandler(c, http.StatusInternalServerError, err)
 				return
 			}
-
 			ResponseHandler(c, http.StatusOK, "Succeed")
 			return
 		}
@@ -108,6 +106,5 @@ func (auth AuthController) SignOut(c *gin.Context) {
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 	}
-
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
