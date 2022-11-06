@@ -11,10 +11,10 @@ import (
 )
 
 var DB_HOST string = "localhost"
-var DB_PORT string = "5432"
-var DB_USER string = "postgres"
-var DB_PASSWORD string = "postgres"
-var DB_NAME string = "postgres"
+var DB_PORT string = "15432"
+var DB_USER string = "uc_root"
+var DB_PASSWORD string = "uc_pwd"
+var DB_NAME string = "uet_class_dev"
 
 func hashPassword(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
