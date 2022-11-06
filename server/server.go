@@ -33,6 +33,7 @@ func Init() {
 	{
 		user := new(controllers.UserController)
 		userRouter.GET("/:id", user.GetUser)
+		userRouter.DELETE("/:id", user.DeleteUser)
 	}
 
 	router.Run(config.GetString("SERVER_PORT"))
