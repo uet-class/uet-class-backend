@@ -2,46 +2,30 @@ package database
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/uet-class/uet-class-backend/config"
+	"log"
 
 	"github.com/go-redis/redis/v8"
 )
 
-var ctx = context.Background()
 var rdb *redis.Client
+var ctx context.Context
 
 func InitRedis() {
-	config := config.GetConfig()
+	// config := config.GetConfig()
+	ctx = context.Background()
 
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", config.GetString("REDIS_HOST"), config.GetString("REDIS_PORT")),
-		Password: config.GetString("REDIS_PASSWORD"),
-		DB:       config.GetInt("REDIS_DATABASE"),
-	})
-
-	err := rdb.Set(ctx, "authorized", "true", 0).Err()
+	opt, err := redis.ParseURL("redis://:@localhost:6379/0?dial_timeout=5s")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	val, err := rdb.Get(ctx, "authorized").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("key", val)
-
-	val2, err := rdb.Get(ctx, "key2").Result()
-	if err == redis.Nil {
-		fmt.Println("key2 does not exist")
-	} else if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("key2", val2)
-	}
+	rdb = redis.NewClient(opt)
 }
 
 func GetRedis() *redis.Client {
 	return rdb
+}
+
+func GetRedisContext() context.Context {
+	return ctx
 }
