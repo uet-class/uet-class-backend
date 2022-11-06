@@ -54,23 +54,47 @@ func Init() *gorm.DB {
 }
 
 func generateUsers(quantity int) []models.User {
-	var prefix_email string = "user"
-	var prefix_password string = "resu"
+	var prefixEmail string = "user"
+	var prefixPassword string = "resu"
 
 	var users []models.User
 
 	for i := 0; i < quantity; i++ {
-		email := fmt.Sprintf("%s%d", prefix_email, i)
-		password := fmt.Sprintf("%s%d", prefix_password, i)
+		email := fmt.Sprintf("%s%d", prefixEmail, i)
+		password := fmt.Sprintf("%s%d", prefixPassword, i)
 		users = append(users, models.User{Email: email, Password: hashPassword(password)})
 	}
 
 	return users
 }
 
+func generateClasses(quantity int) []models.Class {
+	var prefixClassName string = "class"
+	var prefixClassDescription string = "Description of class "
+
+	var classes []models.Class
+
+	for i := 0; i < quantity; i++ {
+		className := fmt.Sprintf("%s%d", prefixClassName, i)
+		classDescription := fmt.Sprintf("%s%d", prefixClassDescription, i)
+		classes = append(classes, models.Class{ClassName: className, Description: classDescription})
+	}
+
+	return classes
+}
+
 func main() {
+	var err error
 	db := Init()
 
 	newUsers := generateUsers(10)
-	db.Create(&newUsers)
+	newClasses := generateClasses(10)
+
+	if err = db.Create(&newUsers).Error; err != nil {
+		fmt.Println(err)
+	}
+
+	if err = db.Create(&newClasses).Error; err != nil {
+		fmt.Println(err)
+	}
 }
