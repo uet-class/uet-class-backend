@@ -2,24 +2,24 @@ package database
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/uet-class/uet-class-backend/config"
 )
 
 var rdb *redis.Client
 var ctx context.Context
 
 func InitRedis() {
-	// config := config.GetConfig()
+	redisConfig := config.GetConfig()
 	ctx = context.Background()
 
-	opt, err := redis.ParseURL("redis://:@localhost:6379/0?dial_timeout=5s")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rdb = redis.NewClient(opt)
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", redisConfig.GetString("REDIS_HOST"), redisConfig.GetString("REDIS_PORT")),
+		Password: redisConfig.GetString("REDIS_PASSWORD"),
+		DB:       redisConfig.GetInt("REDIS_DATABASE"),
+	})
 }
 
 func GetRedis() *redis.Client {
