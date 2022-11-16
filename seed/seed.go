@@ -61,7 +61,7 @@ func generateUsers(quantity int) []models.User {
 	for i := 0; i < quantity; i++ {
 		email := fmt.Sprintf("%s%d", prefixEmail, i)
 		password := fmt.Sprintf("%s%d", prefixPassword, i)
-		users = append(users, models.User{Email: email, Password: hashPassword(password)})
+		users = append(users, models.User{Email: email, Password: hashPassword(password), IsAdmin: false})
 	}
 
 	return users
