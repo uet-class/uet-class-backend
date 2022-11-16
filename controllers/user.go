@@ -39,6 +39,22 @@ func getUserByUserId(userId string) (*models.User, error) {
 	return matchedUser, nil
 }
 
+func getUserBySessionId(sessionId string) (*models.User, error) {
+	db := database.GetDatabase()
+	rdb := database.GetRedis()
+
+	userId, err := rdb.Get(database.GetRedisContext(), sessionId).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	matchedUser := new(models.User)
+	if err := db.First(&matchedUser, userId).Error; err != nil {
+		return nil, err
+	}
+	return matchedUser, nil
+}
+
 func (u UserController) GetUser(c *gin.Context) {
 	userId := c.Param("id")
 	

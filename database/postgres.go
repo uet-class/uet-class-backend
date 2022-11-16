@@ -30,7 +30,6 @@ func InitPostgres() {
 	if err = db.AutoMigrate(
 		&models.User{},
 		&models.Report{},
-		&models.ReportType{},
 		&models.Class{},
 		&models.Post{},
 		&models.Document{},

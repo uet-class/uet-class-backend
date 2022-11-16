@@ -46,5 +46,12 @@ func Init() {
 		classRouter.DELETE("/:id", class.DeleteClass)
 	}
 
+	reportRouter := router.Group("report").Use(middlewares.AuthRequired)
+	{
+		report := new(controllers.ReportController)
+		reportRouter.POST("/", report.CreateReport)
+		reportRouter.GET("/", report.GetUserReports)
+	}
+
 	router.Run(config.GetString("SERVER_PORT"))
 }
