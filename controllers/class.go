@@ -21,13 +21,7 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		return
 	}
 
-	userId, err := getUserIdBySessionId(sessionId)
-	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	matchedUser, err := getUserByUserId(userId)
+	reqUser, err := getUserBySessionId(sessionId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
@@ -39,19 +33,46 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		return
 	}
 
-	reqClass.TeacherID = append(reqClass.TeacherID, *matchedUser)
+	reqClass.Teachers = append(reqClass.Teachers, *reqUser)
 	if err := db.Create(&reqClass).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	reqUser.ClassTeacher = append(reqUser.ClassTeacher, reqClass)
+	if err := db.Save(&reqUser).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) GetUserClasses(c *gin.Context) {
+	db := database.GetDatabase()
+
+	sessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	reqUser, err := getUserBySessionId(sessionId)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err = db.Model(&reqUser).Preload("ClassTeacher").Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, reqUser)
 }
 
 func (class ClassController) GetClass(c *gin.Context) {
 	db := database.GetDatabase()
 
 	var matchedClass models.Class
-	if err := db.Preload("TeacherID").First(&matchedClass, c.Param("id")).Error; err != nil {
+	if err := db.Preload("Teachers").First(&matchedClass, c.Param("id")).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ResponseHandler(c, http.StatusNotFound, err)
 			return
