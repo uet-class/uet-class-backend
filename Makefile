@@ -3,3 +3,7 @@ build:
 
 run:
 	@./main
+
+win:
+	@go build main.go
+	@./main.exe

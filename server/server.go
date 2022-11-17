@@ -1,13 +1,13 @@
 package server
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/controllers"
 	"github.com/uet-class/uet-class-backend/middlewares"
-	"github.com/gin-contrib/cors"
 )
 
 func getHome(c *gin.Context) {
@@ -18,7 +18,7 @@ func Init() {
 	config := config.GetConfig()
 
 	router := gin.Default()
-  router.Use(cors.Default())
+	router.Use(cors.Default())
 	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
 	router.GET("/", getHome)
@@ -42,6 +42,7 @@ func Init() {
 	{
 		class := new(controllers.ClassController)
 		classRouter.POST("/", class.CreateClass)
+		classRouter.GET("/", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
 		classRouter.DELETE("/:id", class.DeleteClass)
 	}
