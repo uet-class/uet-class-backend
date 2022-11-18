@@ -38,15 +38,10 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	reqUser.ClassTeacher = append(reqUser.ClassTeacher, reqClass)
-	if err := db.Save(&reqUser).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
-	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
-func (class ClassController) GetUserClasses(c *gin.Context) {
+func (class ClassController) GetUserTeacherClasses(c *gin.Context) {
 	db := database.GetDatabase()
 
 	sessionId, err := c.Cookie("sessionId")
@@ -55,17 +50,18 @@ func (class ClassController) GetUserClasses(c *gin.Context) {
 		return
 	}
 
-	reqUser, err := getUserBySessionId(sessionId)
+	reqUserId, err := getUserIdBySessionId(sessionId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if err = db.Model(&reqUser).Preload("ClassTeacher").Error; err != nil {
+	var matchedClasses []models.Class
+	if err = db.Raw("SELECT * FROM classes WHERE id IN (SELECT class_id FROM teacher_class WHERE user_id=?)", reqUserId).Scan(&matchedClasses).Error; err != nil{
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ResponseHandler(c, http.StatusOK, reqUser)
+	ResponseHandler(c, http.StatusOK, matchedClasses)
 }
 
 func (class ClassController) GetClass(c *gin.Context) {
@@ -74,10 +70,10 @@ func (class ClassController) GetClass(c *gin.Context) {
 	var matchedClass models.Class
 	if err := db.Preload("Teachers").First(&matchedClass, c.Param("id")).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			ResponseHandler(c, http.StatusNotFound, err)
+			ResponseHandler(c, http.StatusNotFound, err.Error())
 			return
 		}
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, matchedClass)

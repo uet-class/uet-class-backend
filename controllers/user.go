@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 	"gorm.io/gorm"
@@ -18,9 +17,6 @@ func getUserIdBySessionId(sessionId string) (string, error) {
 
 	userId, err := rdb.Get(database.GetRedisContext(), sessionId).Result()
 	if err != nil {
-		if err == redis.Nil {
-			return "", err
-		}
 		return "", err
 	}
 	return userId, nil
@@ -57,7 +53,7 @@ func getUserBySessionId(sessionId string) (*models.User, error) {
 
 func (u UserController) GetUser(c *gin.Context) {
 	userId := c.Param("id")
-	
+
 	matchedUser, err := getUserByUserId(userId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
