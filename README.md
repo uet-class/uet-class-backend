@@ -8,17 +8,10 @@
 
 ## Usage
 
-__NOTE: These steps below are instructions for Linux environment. If you are using another type of OSes (e.g Windows, MacOS, ...), please just use these steps as references.__
-
 - Clone the repository and `cd` inside:
   ``` bash
   git clone https://github.com/UET-Class/uet-class-backend.git
   cd uet-class-backend
-  ```
-
-- Install dependencies:
-  ```bash
-  go install
   ```
 
 - Build the source code:
@@ -35,29 +28,41 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
 
 ## Environment variables
 
-| Variables     | Usage                           |
-| ------------- | ------------------------------- |
-| `SERVER_HOST` | Server hostname                 |
-| `SERVER_PORT` | Server port number              |
-| `DB_HOST`     | Database hostname               |
-| `DB_PORT`     | Database port number            |
-| `DB_USER`     | Database user to connect        |
-| `DB_PASSWORD` | Password of the user to connect |
-| `DB_NAME`     | Database name                   |
+| Variables           | Usage                           |
+| ------------------- | ------------------------------- |
+| `SERVER_HOST`       | Server hostname                 |
+| `SERVER_PORT`       | Server port number              |
+| `POSTGRES_HOST`     | Database hostname               |
+| `POSTGRES_PORT`     | Database port number            |
+| `POSTGRES_USER`     | Database user to connect        |
+| `POSTGRES_PASSWORD` | Password of the user to connect |
+| `POSTGRES_DATABASE` | Postgres name                   |
+| `REDIS_HOST`        | Redis hostname                  |
+| `REDIS_PORT`        | Redis port number               |
+| `REDIS_PASSWORD`    | Redis password (if any)         |
+| `REDIS_DATABASE`    | Redis database name             |
 
-These variables should be defined in a YAML file, named `develop.yaml`, and placed in the `config` directory.
+
+These variables should be defined in a YAML file, named `develop.yaml`, and placed in the `config` directory of this repository.
 For the real configuration, please refer to [configuration-management](https://github.com/uet-class/configuration-management) repository.
 Example: 
 
 ``` yaml
 # config/develop.yaml
+---
 SERVER_HOST: localhost
-SERVER_PORT: :8080  # Note that there is a colon ':' before the port number
-DB_HOST: localhost
-DB_PORT: 5432
-DB_USER: user
-DB_PASSWORD: passwd
-DB_NAME: db_name
+SERVER_PORT: :8080
+
+POSTGRES_HOST: localhost
+POSTGRES_PORT: 15432
+POSTGRES_USER: uc_root
+POSTGRES_PASSWORD: uc_pwd
+POSTGRES_DATABASE: uet_class_dev
+
+REDIS_HOST: localhost
+REDIS_PORT: 6379
+REDIS_PASSWORD: ""
+REDIS_DATABASE: 0
 ```
 
 ## Seeding data
