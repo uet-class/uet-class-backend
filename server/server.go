@@ -42,7 +42,8 @@ func Init() {
 	{
 		class := new(controllers.ClassController)
 		classRouter.POST("/", class.CreateClass)
-		classRouter.GET("/", class.GetUserTeacherClasses)
+		classRouter.POST("/:id/student", class.AddStudent)
+		classRouter.GET("/", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
 		classRouter.DELETE("/:id", class.DeleteClass)
 	}
