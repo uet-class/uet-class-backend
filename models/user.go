@@ -29,6 +29,4 @@ type User struct {
 	Document     []Document   `gorm:"-;foreignKey:CreatorID"`
 	Assignment   []Assignment `gorm:"-;foreignKey:CreatorID"`
 	Submission   []Submission `gorm:"-;foreignKey:StudentID"`
-	ClassStudent []Class      `gorm:"-;many2many:teacher_class;"`
-	ClassTeacher []Class      `gorm:"-;many2many:student_class;"`
 }
