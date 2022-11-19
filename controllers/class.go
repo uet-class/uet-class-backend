@@ -2,10 +2,14 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/smtp"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 	"gorm.io/gorm"
@@ -124,19 +128,56 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
-func (class ClassController) SendInvitationEmail(c *gin.Context) {
-	var (
-		from       = "uetclass.notifier@gmail.com"
-		msg        = []byte("dummy message")
-		recipients = []string{"thainguyen.uet@gmail.com"}
-	)
-	hostname := "smtp.gmail.com"
-	auth := smtp.PlainAuth("", "uetclass.notifier@gmail.com", "xvvpncjpatchxgjp", hostname)
+func getRecipientsWithInvitationIndex(c *gin.Context) (map[string]string, error) {
+	rdb := database.GetRedis()
 
-	err := smtp.SendMail(hostname+":25", auth, from, recipients, msg)
+	recipients := make(map[string]string)
+	var recipientEmails []string
+	if err := c.BindJSON(&recipientEmails); err != nil {
+		return nil, err
+	}
+
+	for _, recipientEmail := range recipientEmails {
+		invitationIndex := uuid.NewString()
+		invitationDuration, err := time.ParseDuration("24h")
+		if err != nil {
+			return nil, err
+		}
+		err = rdb.Set(database.GetRedisContext(), invitationIndex, recipientEmail, invitationDuration).Err()
+		if err != nil {
+			return nil, err
+		}
+		recipients[invitationIndex] = recipientEmail
+	}
+	return recipients, nil
+}
+
+func (class ClassController) SendInvitationEmail(c *gin.Context) {
+	envConfig := config.GetConfig()
+
+	recipients, err := getRecipientsWithInvitationIndex(c)
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	sender := envConfig.GetString("SMTP_EMAIL_USERNAME")
+	hostname := "smtp.gmail.com"
+	smtpAddress := fmt.Sprintf("%s:%s", hostname, envConfig.GetString("SMTP_PORT"))
+	auth := smtp.PlainAuth("", sender, envConfig.GetString("SMTP_EMAIL_PASSWORD"), hostname)
+
+	for invitationIndex, recipientEmail := range recipients {
+		fmt.Println(invitationIndex)
+
+		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
+		subjectHeader := "Subject: Invitation to a new class!\r\n"
+		body := fmt.Sprintf("Confirmation link: %s\r\n", invitationIndex)
+
+		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
+		if err := smtp.SendMail(smtpAddress, auth, sender, []string{recipientEmail}, message); err != nil {
+			ResponseHandler(c, http.StatusInternalServerError, err)
+			return
+		}
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
