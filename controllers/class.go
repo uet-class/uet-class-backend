@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"net/smtp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
@@ -119,6 +120,23 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 			return
 		}
 		ResponseHandler(c, http.StatusInternalServerError, err)
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) SendInvitationEmail(c *gin.Context) {
+	var (
+		from       = "uetclass.notifier@gmail.com"
+		msg        = []byte("dummy message")
+		recipients = []string{"thainguyen.uet@gmail.com"}
+	)
+	hostname := "smtp.gmail.com"
+	auth := smtp.PlainAuth("", "uetclass.notifier@gmail.com", "xvvpncjpatchxgjp", hostname)
+
+	err := smtp.SendMail(hostname+":25", auth, from, recipients, msg)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
