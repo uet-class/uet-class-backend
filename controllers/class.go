@@ -17,6 +17,30 @@ import (
 
 type ClassController struct{}
 
+func getRecipientsWithInvitationIndex(c *gin.Context) (map[string]string, error) {
+	rdb := database.GetRedis()
+
+	recipients := make(map[string]string)
+	var recipientEmails []string
+	if err := c.BindJSON(&recipientEmails); err != nil {
+		return nil, err
+	}
+
+	for _, recipientEmail := range recipientEmails {
+		invitationIndex := uuid.NewString()
+		invitationDuration, err := time.ParseDuration("24h")
+		if err != nil {
+			return nil, err
+		}
+		err = rdb.Set(database.GetRedisContext(), invitationIndex, recipientEmail, invitationDuration).Err()
+		if err != nil {
+			return nil, err
+		}
+		recipients[invitationIndex] = recipientEmail
+	}
+	return recipients, nil
+}
+
 func (class ClassController) CreateClass(c *gin.Context) {
 	db := database.GetDatabase()
 
@@ -128,30 +152,6 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
-func getRecipientsWithInvitationIndex(c *gin.Context) (map[string]string, error) {
-	rdb := database.GetRedis()
-
-	recipients := make(map[string]string)
-	var recipientEmails []string
-	if err := c.BindJSON(&recipientEmails); err != nil {
-		return nil, err
-	}
-
-	for _, recipientEmail := range recipientEmails {
-		invitationIndex := uuid.NewString()
-		invitationDuration, err := time.ParseDuration("24h")
-		if err != nil {
-			return nil, err
-		}
-		err = rdb.Set(database.GetRedisContext(), invitationIndex, recipientEmail, invitationDuration).Err()
-		if err != nil {
-			return nil, err
-		}
-		recipients[invitationIndex] = recipientEmail
-	}
-	return recipients, nil
-}
-
 func (class ClassController) SendInvitationEmail(c *gin.Context) {
 	envConfig := config.GetConfig()
 
@@ -161,20 +161,23 @@ func (class ClassController) SendInvitationEmail(c *gin.Context) {
 		return
 	}
 
-	sender := envConfig.GetString("SMTP_EMAIL_USERNAME")
-	hostname := "smtp.gmail.com"
-	smtpAddress := fmt.Sprintf("%s:%s", hostname, envConfig.GetString("SMTP_PORT"))
-	auth := smtp.PlainAuth("", sender, envConfig.GetString("SMTP_EMAIL_PASSWORD"), hostname)
+	smtpSender := envConfig.GetString("SMTP_EMAIL_USERNAME")
+	smtpPassword := envConfig.GetString("SMTP_EMAIL_PASSWORD")
+	smtpHostname := envConfig.GetString("SMTP_HOSTNAME")
+	smtpPort := envConfig.GetString("SMTP_PORT")
+	smtpAddress := fmt.Sprintf("%s:%s", smtpHostname, smtpPort)
+	auth := smtp.PlainAuth("", smtpSender, smtpPassword, smtpHostname)
 
 	for invitationIndex, recipientEmail := range recipients {
 		fmt.Println(invitationIndex)
 
 		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
 		subjectHeader := "Subject: Invitation to a new class!\r\n"
-		body := fmt.Sprintf("Confirmation link: %s\r\n", invitationIndex)
+		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/:id/accept-invitation/:invitation-id
+		body := fmt.Sprintf("Confirmation link: https://%s/class/%s/accept-invitation/%s\r\n", envConfig.GetString("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
-		if err := smtp.SendMail(smtpAddress, auth, sender, []string{recipientEmail}, message); err != nil {
+		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
 			ResponseHandler(c, http.StatusInternalServerError, err)
 			return
 		}
