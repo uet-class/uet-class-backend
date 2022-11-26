@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
-	"gorm.io/gorm"
 )
 
 type UserController struct{}
@@ -20,19 +18,6 @@ func getUserIdBySessionId(sessionId string) (string, error) {
 		return "", err
 	}
 	return userId, nil
-}
-
-func getUserByUserId(userId string) (*models.User, error) {
-	db := database.GetDatabase()
-
-	matchedUser := new(models.User)
-	if err := db.First(&matchedUser, userId).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
-		return nil, err
-	}
-	return matchedUser, nil
 }
 
 func getUserBySessionId(sessionId string) (*models.User, error) {
@@ -51,10 +36,14 @@ func getUserBySessionId(sessionId string) (*models.User, error) {
 	return matchedUser, nil
 }
 
-func (u UserController) GetUser(c *gin.Context) {
-	userId := c.Param("id")
+func (u UserController) GetUserInformation(c *gin.Context) {
+	sessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	matchedUser, err := getUserByUserId(userId)
+	matchedUser, err := getUserBySessionId(sessionId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
@@ -70,4 +59,8 @@ func (u UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (u UserController) UpdateUser(c *gin.Context) {
+	
 }
