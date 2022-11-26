@@ -93,10 +93,20 @@ func (class ClassController) CreateClass(c *gin.Context) {
 func (class ClassController) AddStudent(c *gin.Context) {
 	db := database.GetDatabase()
 
-	var reqUser models.User
-	if err := c.BindJSON(&reqUser); err != nil {
+	var studentEmails []string
+	if err := c.BindJSON(&studentEmails); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	var students []models.User
+	for _, studentEmail := range studentEmails {
+		student, err := getUserByUserEmail(studentEmail)
+		if err != nil {
+			ResponseHandler(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		students = append(students, *student)
 	}
 
 	var matchedClass models.Class
@@ -105,7 +115,7 @@ func (class ClassController) AddStudent(c *gin.Context) {
 		return
 	}
 
-	if err := db.Model(&matchedClass).Association("Students").Append(&reqUser); err != nil {
+	if err := db.Model(&matchedClass).Association("Students").Append(&students); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
