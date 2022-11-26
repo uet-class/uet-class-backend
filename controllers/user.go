@@ -30,6 +30,16 @@ func getUserByUserId(userId string) (*models.User, error) {
 	return matchedUser, nil
 }
 
+func getUserByUserEmail(userEmail string) (*models.User, error) {
+	db := database.GetDatabase()
+
+	matchedUser := new(models.User)
+	if err := db.Where(&models.User{Email: userEmail}).First(&matchedUser).Error; err != nil {
+		return nil, err
+	}
+	return matchedUser, nil
+}
+
 func getUserBySessionId(sessionId string) (*models.User, error) {
 	userId, err := getUserIdBySessionId(sessionId)
 	if err != nil {

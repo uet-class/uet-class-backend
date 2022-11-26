@@ -2,15 +2,64 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"net/smtp"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 	"gorm.io/gorm"
 )
 
 type ClassController struct{}
+
+func getRecipientsWithInvitationIndex(c *gin.Context) (map[string]string, error) {
+	rdb := database.GetRedis()
+
+	recipients := make(map[string]string)
+	var recipientEmails []string
+	if err := c.BindJSON(&recipientEmails); err != nil {
+		return nil, err
+	}
+
+	for _, recipientEmail := range recipientEmails {
+		invitationIndex := uuid.NewString()
+		invitationDuration, err := time.ParseDuration("24h")
+		if err != nil {
+			return nil, err
+		}
+		err = rdb.Set(database.GetRedisContext(), invitationIndex, recipientEmail, invitationDuration).Err()
+		if err != nil {
+			return nil, err
+		}
+		recipients[invitationIndex] = recipientEmail
+	}
+	return recipients, nil
+}
+
+func getClassByClassId(id string) (*models.Class, error) {
+	db := database.GetDatabase()
+
+	matchedClass := new(models.Class)
+	if err := db.First(&matchedClass, id).Error; err != nil {
+		return nil, err
+	}
+	return matchedClass, nil
+}
+
+func getUserEmailByInvitationId(invitationId string) (string, error) {
+	rdb := database.GetRedis()
+
+	userEmail, err := rdb.Get(database.GetRedisContext(), invitationId).Result()
+	if err != nil {
+		return "", err
+	}
+	return userEmail, nil
+}
 
 func (class ClassController) CreateClass(c *gin.Context) {
 	db := database.GetDatabase()
@@ -101,7 +150,7 @@ func (class ClassController) GetClass(c *gin.Context) {
 	db := database.GetDatabase()
 
 	var matchedClass models.Class
-	if err := db.Preload("Teachers").First(&matchedClass, c.Param("id")).Error; err != nil {
+	if err := db.Preload("Teachers").Preload("Students").First(&matchedClass, c.Param("id")).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -121,4 +170,64 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) SendInvitation(c *gin.Context) {
+	envConfig := config.GetConfig()
+
+	recipients, err := getRecipientsWithInvitationIndex(c)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	smtpSender := envConfig.GetString("SMTP_EMAIL_USERNAME")
+	smtpPassword := envConfig.GetString("SMTP_EMAIL_PASSWORD")
+	smtpHostname := envConfig.GetString("SMTP_HOSTNAME")
+	smtpPort := envConfig.GetString("SMTP_PORT")
+	smtpAddress := fmt.Sprintf("%s:%s", smtpHostname, smtpPort)
+	auth := smtp.PlainAuth("", smtpSender, smtpPassword, smtpHostname)
+
+	for invitationIndex, recipientEmail := range recipients {
+		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
+		subjectHeader := "Subject: Invitation to a new class!\r\n"
+		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/accept-invitation/?classId=xxx&invitationId=yyy
+		body := fmt.Sprintf("Confirmation link: https://%s/class/accept-invitation/?classId=%s&invitationId=%s\r\n", envConfig.GetString("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
+
+		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
+		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
+			ResponseHandler(c, http.StatusInternalServerError, err)
+			return
+		}
+		fmt.Println("Email is sent to: ", recipientEmail)
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) AcceptInvitation(c *gin.Context) {
+	db := database.GetDatabase()
+
+	invitedClass, err := getClassByClassId(c.Query("classId"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userEmail, err := getUserEmailByInvitationId(c.Query("invitationId"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	invitedStudent, err := getUserByUserEmail(userEmail)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := db.Model(invitedClass).Association("Students").Append(invitedStudent); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusInternalServerError, "Succeed")
 }
