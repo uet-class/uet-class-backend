@@ -65,14 +65,9 @@ func (u UserController) GetUser(c *gin.Context) {
 func (u UserController) DeleteUser(c *gin.Context) {
 	db := database.GetDatabase()
 
-	var matchedUser models.User
-
-	if err := db.Delete(&matchedUser, c.Param("id")).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			ResponseHandler(c, http.StatusNotFound, err)
-			return
-		}
-		ResponseHandler(c, http.StatusInternalServerError, err)
+	if err := db.Where("email = ?", c.Param("email")).Delete(&models.User{}).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }

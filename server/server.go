@@ -35,7 +35,7 @@ func Init() {
 	{
 		user := new(controllers.UserController)
 		userRouter.GET("/:id", user.GetUser)
-		userRouter.DELETE("/:id", user.DeleteUser)
+		userRouter.DELETE("/:email", user.DeleteUser)
 	}
 
 	classRouter := router.Group("class").Use(middlewares.AuthRequired)
