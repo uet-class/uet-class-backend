@@ -79,6 +79,7 @@ func (u UserController) UpdateUser(c *gin.Context) {
 
 	matchedUser.AvatarUrl = updatedUser.AvatarUrl
 	matchedUser.FullName = updatedUser.FullName
+	matchedUser.DateOfBirth = updatedUser.DateOfBirth
 	matchedUser.PhoneNumber = updatedUser.PhoneNumber
 	matchedUser.Password, err = hashPassword(updatedUser.Password)
 	if err != nil {
