@@ -150,7 +150,7 @@ func (class ClassController) GetClass(c *gin.Context) {
 	db := database.GetDatabase()
 
 	var matchedClass models.Class
-	if err := db.Preload("Teachers").First(&matchedClass, c.Param("id")).Error; err != nil {
+	if err := db.Preload("Teachers").Preload("Students").First(&matchedClass, c.Param("id")).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -199,6 +199,7 @@ func (class ClassController) SendInvitation(c *gin.Context) {
 			ResponseHandler(c, http.StatusInternalServerError, err)
 			return
 		}
+		fmt.Println("Email is sent to: ", recipientEmail)
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
@@ -224,7 +225,7 @@ func (class ClassController) AcceptInvitation(c *gin.Context) {
 		return
 	}
 
-	if err := db.Model(invitedClass).Association("Student").Append(invitedStudent); err != nil {
+	if err := db.Model(invitedClass).Association("Students").Append(invitedStudent); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
