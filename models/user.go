@@ -19,10 +19,10 @@ type User struct {
 	Password     string       `gorm:"not null"`
 	FullName     string       `gorm:"not null"`
 	IsAdmin      bool         `gorm:"not null"`
-	DateOfBirth  time.Time    `gorm:"-"`
-	AvatarUrl    string       `gorm:"-"`
-	PhoneNumber  string       `gorm:"-"`
-	ClassName    string       `gorm:"-"`
+	DateOfBirth  time.Time    
+	AvatarUrl    string       
+	PhoneNumber  string       
+	ClassName    string       
 	Comment      []Comment    `gorm:"-;foreignKey:CreatorID"`
 	Report       []Report     `gorm:"-;foreignKey:ReporterID"`
 	Post         []Post       `gorm:"-;foreignKey:CreatorID"`

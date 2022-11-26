@@ -79,9 +79,12 @@ func (u UserController) UpdateUser(c *gin.Context) {
 
 	matchedUser.AvatarUrl = updatedUser.AvatarUrl
 	matchedUser.FullName = updatedUser.FullName
-	matchedUser.Email = updatedUser.Email
-	matchedUser.Password = updatedUser.Password
 	matchedUser.PhoneNumber = updatedUser.PhoneNumber
+	matchedUser.Password, err = hashPassword(updatedUser.Password)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	if err := db.Save(&matchedUser).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
