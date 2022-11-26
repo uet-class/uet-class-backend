@@ -172,7 +172,7 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
-func (class ClassController) SendInvitationEmail(c *gin.Context) {
+func (class ClassController) SendInvitation(c *gin.Context) {
 	envConfig := config.GetConfig()
 
 	recipients, err := getRecipientsWithInvitationIndex(c)
@@ -189,12 +189,10 @@ func (class ClassController) SendInvitationEmail(c *gin.Context) {
 	auth := smtp.PlainAuth("", smtpSender, smtpPassword, smtpHostname)
 
 	for invitationIndex, recipientEmail := range recipients {
-		fmt.Println(invitationIndex)
-
 		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
 		subjectHeader := "Subject: Invitation to a new class!\r\n"
-		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/:id/accept-invitation/:invitation-id
-		body := fmt.Sprintf("Confirmation link: https://%s/class/%s/accept-invitation/%s\r\n", envConfig.GetString("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
+		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/accept-invitation/?classId=xxx&invitationId=yyy
+		body := fmt.Sprintf("Confirmation link: https://%s/class/accept-invitation/?classId=%s&invitationId=%s\r\n", envConfig.GetString("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
 		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
@@ -205,16 +203,16 @@ func (class ClassController) SendInvitationEmail(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
-func (class ClassController) AcceptInvitationEmail(c *gin.Context) {
+func (class ClassController) AcceptInvitation(c *gin.Context) {
 	db := database.GetDatabase()
 
-	invitedClass, err := getClassByClassId(c.Param("id"))
+	invitedClass, err := getClassByClassId(c.Query("classId"))
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	userEmail, err := getUserEmailByInvitationId(c.Param("invitation-id"))
+	userEmail, err := getUserEmailByInvitationId(c.Query("invitationId"))
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
