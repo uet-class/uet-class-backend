@@ -41,6 +41,26 @@ func getRecipientsWithInvitationIndex(c *gin.Context) (map[string]string, error)
 	return recipients, nil
 }
 
+func getClassByClassId(id string) (*models.Class, error) {
+	db := database.GetDatabase()
+
+	matchedClass := new(models.Class)
+	if err := db.First(&matchedClass, id).Error; err != nil {
+		return nil, err
+	}
+	return matchedClass, nil
+}
+
+func getUserEmailByInvitationId(invitationId string) (string, error) {
+	rdb := database.GetRedis()
+
+	userEmail, err := rdb.Get(database.GetRedisContext(), invitationId).Result()
+	if err != nil {
+		return "", err
+	}
+	return userEmail, nil
+}
+
 func (class ClassController) CreateClass(c *gin.Context) {
 	db := database.GetDatabase()
 
@@ -183,4 +203,32 @@ func (class ClassController) SendInvitationEmail(c *gin.Context) {
 		}
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) AcceptInvitationEmail(c *gin.Context) {
+	db := database.GetDatabase()
+
+	invitedClass, err := getClassByClassId(c.Param("id"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userEmail, err := getUserEmailByInvitationId(c.Param("invitation-id"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	invitedStudent, err := getUserByUserEmail(userEmail)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := db.Model(invitedClass).Association("Student").Append(invitedStudent); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusInternalServerError, "Succeed")
 }
