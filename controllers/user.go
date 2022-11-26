@@ -20,14 +20,8 @@ func getUserIdBySessionId(sessionId string) (string, error) {
 	return userId, nil
 }
 
-func getUserBySessionId(sessionId string) (*models.User, error) {
+func getUserByUserId(userId string) (*models.User, error) {
 	db := database.GetDatabase()
-	rdb := database.GetRedis()
-
-	userId, err := rdb.Get(database.GetRedisContext(), sessionId).Result()
-	if err != nil {
-		return nil, err
-	}
 
 	matchedUser := new(models.User)
 	if err := db.First(&matchedUser, userId).Error; err != nil {
@@ -36,19 +30,26 @@ func getUserBySessionId(sessionId string) (*models.User, error) {
 	return matchedUser, nil
 }
 
-func (u UserController) GetUserInformation(c *gin.Context) {
-	sessionId, err := c.Cookie("sessionId")
+func getUserBySessionId(sessionId string) (*models.User, error) {
+	userId, err := getUserIdBySessionId(sessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	matchedUser, err := getUserByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	return matchedUser, nil
+}
+
+func (u UserController) GetUser(c *gin.Context) {
+	matchUser, err := getUserByUserId(c.Param("id"))
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	matchedUser, err := getUserBySessionId(sessionId)
-	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
-		return
-	}
-	ResponseHandler(c, http.StatusOK, matchedUser)
+	ResponseHandler(c, http.StatusOK, matchUser)
 }
 
 func (u UserController) DeleteUser(c *gin.Context) {
@@ -62,5 +63,29 @@ func (u UserController) DeleteUser(c *gin.Context) {
 }
 
 func (u UserController) UpdateUser(c *gin.Context) {
-	
+	db := database.GetDatabase()
+
+	var updatedUser models.User
+	if err := c.BindJSON(&updatedUser); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	matchedUser, err := getUserByUserId(c.Param("id"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	matchedUser.AvatarUrl = updatedUser.AvatarUrl
+	matchedUser.FullName = updatedUser.FullName
+	matchedUser.Email = updatedUser.Email
+	matchedUser.Password = updatedUser.Password
+	matchedUser.PhoneNumber = updatedUser.PhoneNumber
+
+	if err := db.Save(&matchedUser).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, matchedUser)
 }
