@@ -82,8 +82,8 @@ func (auth AuthController) SignIn(c *gin.Context) {
 				ResponseHandler(c, http.StatusInternalServerError, err)
 				return
 			}
-			cookies := map[string]string{"sessionId": sessionId}
-			ResponseHandler(c, http.StatusOK, cookies)
+			response := map[string]interface{}{"sessionId": sessionId, "userId": matchedUser.ID}
+			ResponseHandler(c, http.StatusOK, response)
 			return
 		}
 	}
