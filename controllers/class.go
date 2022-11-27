@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/smtp"
@@ -12,7 +11,6 @@ import (
 	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
-	"gorm.io/gorm"
 )
 
 type ClassController struct{}
@@ -171,13 +169,14 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 	db := database.GetDatabase()
 
 	var matchedClass models.Class
+	if err := db.First(&matchedClass, c.Param("id")).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	if err := db.Delete(&matchedClass, c.Param("id")).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			ResponseHandler(c, http.StatusNotFound, err)
-			return
-		}
+	if err := db.Delete(&matchedClass).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
