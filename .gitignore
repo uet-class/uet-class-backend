@@ -25,3 +25,4 @@ go.work
 # environment variable files
 config/develop.yaml
 config/product.yaml
+storage/*.json
