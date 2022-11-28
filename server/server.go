@@ -18,7 +18,16 @@ func Init() {
 	config := config.GetConfig()
 
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"http://uc-frontend",
+			"https://uetclass-backend.duckdns.org",
+		},
+		AllowMethods:     []string{"GET", "POST", "DELETE"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
 	router.GET("/", getHome)
