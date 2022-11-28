@@ -22,7 +22,7 @@ func Init() {
 		AllowOrigins: []string{
 			"http://localhost:3000",
 			"http://uc-frontend",
-			"https://uetclass-backend.duckdns.org",
+			"https://uetclass.duckdns.org",
 		},
 		AllowMethods:     []string{"GET", "POST", "DELETE"},
 		ExposeHeaders:    []string{"Content-Length"},
