@@ -11,7 +11,7 @@ import (
 )
 
 func getHome(c *gin.Context) {
-	c.String(200, "This is our homepage")
+	c.String(200, "These are our APIs.")
 }
 
 func Init() {
@@ -30,9 +30,9 @@ func Init() {
 	}))
 	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
-	router.GET("/", getHome)
+	router.GET("/api", getHome)
 
-	authRouter := router.Group("auth")
+	authRouter := router.Group("api/auth")
 	{
 		auth := new(controllers.AuthController)
 		authRouter.POST("/signup", auth.SignUp)
@@ -40,7 +40,7 @@ func Init() {
 		authRouter.POST("/signout", middlewares.AuthRequired, auth.SignOut)
 	}
 
-	userRouter := router.Group("user").Use(middlewares.AuthRequired)
+	userRouter := router.Group("api/user").Use(middlewares.AuthRequired)
 	{
 		user := new(controllers.UserController)
 		userRouter.GET("/:id", user.GetUser)
@@ -48,7 +48,7 @@ func Init() {
 		userRouter.DELETE("/:email", user.DeleteUser)
 	}
 
-	classRouter := router.Group("class").Use(middlewares.AuthRequired)
+	classRouter := router.Group("api/class").Use(middlewares.AuthRequired)
 	{
 		class := new(controllers.ClassController)
 		classRouter.POST("/", class.CreateClass)
@@ -60,7 +60,7 @@ func Init() {
 		classRouter.DELETE("/:id", class.DeleteClass)
 	}
 
-	reportRouter := router.Group("report").Use(middlewares.AuthRequired)
+	reportRouter := router.Group("api/report").Use(middlewares.AuthRequired)
 	{
 		report := new(controllers.ReportController)
 		reportRouter.POST("/", report.CreateReport)
