@@ -76,7 +76,7 @@ func (auth AuthController) SignIn(c *gin.Context) {
 				return
 			}
 			// Store and send the session cookie back to the client
-			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "uetclass-dev.duckdns.org", false, true)
+			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "", false, true)
 			err = rdb.Set(database.GetRedisContext(), sessionId, matchedUser.ID, sessionDuration).Err()
 			if err != nil {
 				ResponseHandler(c, http.StatusInternalServerError, err)
