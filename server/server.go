@@ -15,29 +15,20 @@ func getHome(c *gin.Context) {
 }
 
 func Init() {
-	// config := config.GetConfig()
-
-	// router := gin.Default()
-	// router.Use(cors.New(cors.Config{
-	// 	AllowOrigins: []string{
-	// 		"http://localhost:3000",
-	// 		"http://uc-frontend",
-	// 		"https://uetclass.duckdns.org",
-	// 	},
-	// 	AllowMethods:     []string{"GET", "POST", "DELETE"},
-	// 	ExposeHeaders:    []string{"Content-Length"},
-	// 	AllowCredentials: true,
-	// }))
-
 	router := gin.Default()
 	config := config.GetConfig()
-	confi := cors.DefaultConfig()
-    confi.AllowOrigins = []string{"http://localhost:3000"}
-	confi.AllowCredentials = true
-	confi.ExposeHeaders = []string{"Content-Length"}
-	confi.AllowMethods = []string{"GET", "POST", "DELETE"}
 
-	router.Use(cors.New(confi))
+	corsPolicy := cors.DefaultConfig()
+	corsPolicy.AllowOrigins = []string{
+		"http://localhost:3000",
+		"http://uc-frontend",
+		"https://uetclass.duckdns.org",
+	}
+	corsPolicy.AllowCredentials = true
+	corsPolicy.ExposeHeaders = []string{"Content-Length"}
+	corsPolicy.AllowMethods = []string{"GET", "POST", "DELETE"}
+
+	router.Use(cors.New(corsPolicy))
 	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
 	router.GET("/api", getHome)
@@ -61,7 +52,7 @@ func Init() {
 	classRouter := router.Group("api/class").Use(middlewares.AuthRequired)
 	{
 		class := new(controllers.ClassController)
-		classRouter.POST("/", class.CreateClass)
+		classRouter.POST("", class.CreateClass)
 		classRouter.POST("/:id/add-student", class.AddStudent)
 		classRouter.POST("/:id/send-invitation", class.SendInvitation)
 		classRouter.GET("/accept-invitation", class.AcceptInvitation)
@@ -73,8 +64,8 @@ func Init() {
 	reportRouter := router.Group("api/report").Use(middlewares.AuthRequired)
 	{
 		report := new(controllers.ReportController)
-		reportRouter.POST("/", report.CreateReport)
-		reportRouter.GET("/", report.GetUserReports)
+		reportRouter.POST("", report.CreateReport)
+		reportRouter.GET("", report.GetUserReports)
 	}
 
 	router.Run(config.GetString("SERVER_PORT"))
