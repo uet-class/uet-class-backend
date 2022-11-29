@@ -15,19 +15,29 @@ func getHome(c *gin.Context) {
 }
 
 func Init() {
-	config := config.GetConfig()
+	// config := config.GetConfig()
+
+	// router := gin.Default()
+	// router.Use(cors.New(cors.Config{
+	// 	AllowOrigins: []string{
+	// 		"http://localhost:3000",
+	// 		"http://uc-frontend",
+	// 		"https://uetclass.duckdns.org",
+	// 	},
+	// 	AllowMethods:     []string{"GET", "POST", "DELETE"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }))
 
 	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:3000",
-			"http://uc-frontend",
-			"https://uetclass.duckdns.org",
-		},
-		AllowMethods:     []string{"GET", "POST", "DELETE"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	config := config.GetConfig()
+	confi := cors.DefaultConfig()
+    confi.AllowOrigins = []string{"http://localhost:3000"}
+	confi.AllowCredentials = true
+	confi.ExposeHeaders = []string{"Content-Length"}
+	confi.AllowMethods = []string{"GET", "POST", "DELETE"}
+
+	router.Use(cors.New(confi))
 	router.Use(sessions.Sessions("uc-session", cookie.NewStore([]byte("SessionSecret"))))
 
 	router.GET("/api", getHome)
