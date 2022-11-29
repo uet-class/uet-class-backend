@@ -25,7 +25,7 @@ func (report ReportController) CreateReport(c *gin.Context) {
 		return
 	}
 
-	reqUser, err := getUserBySessionId(sessionId)
+	reqUser, err := GetUserBySessionId(sessionId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return

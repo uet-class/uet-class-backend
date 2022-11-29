@@ -68,7 +68,7 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		return
 	}
 
-	reqUser, err := getUserBySessionId(sessionId)
+	reqUser, err := GetUserBySessionId(sessionId)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
@@ -152,6 +152,17 @@ func (class ClassController) GetUserClasses(c *gin.Context) {
 		"studentClasses": matchedStudentClasses,
 	}
 	ResponseHandler(c, http.StatusOK, result)
+}
+
+func (class ClassController) GetAllClasses(c *gin.Context) {
+	db := database.GetDatabase()
+
+	var allClasses []models.Class
+	if err := db.Find(&allClasses).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, allClasses)
 }
 
 func (class ClassController) GetClass(c *gin.Context) {

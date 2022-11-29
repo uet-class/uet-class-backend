@@ -59,6 +59,8 @@ func Init() {
 		classRouter.GET("/all", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
 		classRouter.DELETE("/:id", class.DeleteClass)
+
+		classRouter.GET("/all-classes", middlewares.IsAdmin, class.GetAllClasses)
 	}
 
 	reportRouter := router.Group("api/report").Use(middlewares.AuthRequired)
