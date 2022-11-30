@@ -10,6 +10,13 @@ import (
 
 type UserController struct{}
 
+func infoIsChanged(newInfo string, oldInfo string) bool {
+	if newInfo != oldInfo && newInfo != "" {
+		return true
+	}
+	return false
+}
+
 func getUserIdBySessionId(sessionId string) (string, error) {
 	rdb := database.GetRedis()
 
@@ -93,15 +100,25 @@ func (u UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	matchedUser.AvatarUrl = updatedUser.AvatarUrl
-	matchedUser.FullName = updatedUser.FullName
-	matchedUser.DateOfBirth = updatedUser.DateOfBirth
-	matchedUser.PhoneNumber = updatedUser.PhoneNumber
-	matchedUser.Password, err = hashPassword(updatedUser.Password)
-	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
+	if updatedUser.Password != "" && !checkPasswordHash(updatedUser.Password, matchedUser.Password) {
+		if matchedUser.Password, err = hashPassword(updatedUser.Password); err != nil {
+			ResponseHandler(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
+	
+	if infoIsChanged(updatedUser.FullName, matchedUser.FullName) {
+		matchedUser.FullName = updatedUser.FullName
+	}
+
+	if infoIsChanged(updatedUser.DateOfBirth, matchedUser.DateOfBirth) {
+		matchedUser.DateOfBirth = updatedUser.DateOfBirth
+	}
+
+	if infoIsChanged(updatedUser.PhoneNumber, matchedUser.PhoneNumber) {
+		matchedUser.PhoneNumber = updatedUser.PhoneNumber
+	}
+	// matchedUser.AvatarUrl = updatedUser.AvatarUrl
 
 	if err := db.Save(&matchedUser).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
