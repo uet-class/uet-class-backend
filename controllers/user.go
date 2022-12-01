@@ -1,8 +1,14 @@
 package controllers
 
 import (
+	"context"
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
@@ -60,6 +66,36 @@ func getUserBySessionId(sessionId string) (*models.User, error) {
 	return matchedUser, nil
 }
 
+func uploadFile(bucketName string, fileName string, file multipart.FileHeader) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	uploadFile, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer uploadFile.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	objectHandle := client.Bucket(bucketName).Object(fileName)
+	objectHandle = objectHandle.If(storage.Conditions{DoesNotExist: true})
+
+	objectWriter := objectHandle.NewWriter(ctx)
+	if _, err = io.Copy(objectWriter, uploadFile); err != nil {
+		return err
+	}
+	if err := objectWriter.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u UserController) GetUser(c *gin.Context) {
 	matchUser, err := getUserByUserId(c.Param("id"))
 	if err != nil {
@@ -106,7 +142,7 @@ func (u UserController) UpdateUser(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	if infoIsChanged(updatedUser.FullName, matchedUser.FullName) {
 		matchedUser.FullName = updatedUser.FullName
 	}
@@ -125,4 +161,47 @@ func (u UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 	ResponseHandler(c, http.StatusOK, matchedUser)
+}
+
+func (u UserController) UploadUserAvatar(c *gin.Context) {
+	// storageClient := storage.GetStorageClient()
+
+	avatarImage, err := c.FormFile("AvatarImage")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := uploadFile("uc-backend", avatarImage.Filename, *avatarImage); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	//  // Open local file.
+	//  f, err := os.Open("notes.txt")
+	//  if err != nil {
+	// 				 return fmt.Errorf("os.Open: %v", err)
+	//  }
+	//  defer f.Close()
+
+	//  ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	//  defer cancel()
+
+	//  o := storageClient.Bucket(bucket).Object(object)
+
+	//  wc := o.NewWriter(ctx)
+	//       if _, err = io.Copy(wc, f); err != nil {
+	//               return fmt.Errorf("io.Copy: %v", err)
+	//       }
+	//       if err := wc.Close(); err != nil {
+	//               return fmt.Errorf("Writer.Close: %v", err)
+	//       }
+	//       fmt.Fprintf(w, "Blob %v uploaded.\n", object)
+
+	// Upload the file to specific dst.
+	if err := c.SaveUploadedFile(avatarImage, "storage/"+avatarImage.Filename); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", avatarImage.Filename))
 }
