@@ -167,8 +167,10 @@ func (u UserController) UpdateUser(c *gin.Context) {
 }
 
 func (u UserController) UploadUserAvatar(c *gin.Context) {
+	db := database.GetDatabase()
 	conf := config.GetConfig()
 	bucketName := conf.GetString("GCS_BUCKET_AVATARS")
+
 	avatarImage, err := c.FormFile("avatar")
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
@@ -181,6 +183,19 @@ func (u UserController) UploadUserAvatar(c *gin.Context) {
 	}
 
 	avatarUrl := fmt.Sprintf("%s/%s/%s", GoogleCloudStoragePrefix, bucketName, avatarImage.Filename)
+
+	matchedUser, err := getUserByUserId(c.Param("id"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	matchedUser.AvatarUrl = avatarUrl
+	if err := db.Save(&matchedUser).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	response := map[string]interface{}{"avatarUrl": avatarUrl}
 	ResponseHandler(c, http.StatusOK, response)
 }
