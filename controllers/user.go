@@ -10,9 +10,12 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
+	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 )
+
+const GoogleCloudStoragePrefix = "https://storage.googleapis.com"
 
 type UserController struct{}
 
@@ -164,44 +167,20 @@ func (u UserController) UpdateUser(c *gin.Context) {
 }
 
 func (u UserController) UploadUserAvatar(c *gin.Context) {
-	// storageClient := storage.GetStorageClient()
-
-	avatarImage, err := c.FormFile("AvatarImage")
+	conf := config.GetConfig()
+	bucketName := conf.GetString("GCS_BUCKET_AVATARS")
+	avatarImage, err := c.FormFile("avatar")
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if err := uploadFile("uc-backend", avatarImage.Filename, *avatarImage); err != nil {
+	if err := uploadFile(bucketName, avatarImage.Filename, *avatarImage); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
 	}
-	//  // Open local file.
-	//  f, err := os.Open("notes.txt")
-	//  if err != nil {
-	// 				 return fmt.Errorf("os.Open: %v", err)
-	//  }
-	//  defer f.Close()
 
-	//  ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	//  defer cancel()
-
-	//  o := storageClient.Bucket(bucket).Object(object)
-
-	//  wc := o.NewWriter(ctx)
-	//       if _, err = io.Copy(wc, f); err != nil {
-	//               return fmt.Errorf("io.Copy: %v", err)
-	//       }
-	//       if err := wc.Close(); err != nil {
-	//               return fmt.Errorf("Writer.Close: %v", err)
-	//       }
-	//       fmt.Fprintf(w, "Blob %v uploaded.\n", object)
-
-	// Upload the file to specific dst.
-	if err := c.SaveUploadedFile(avatarImage, "storage/"+avatarImage.Filename); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", avatarImage.Filename))
+	avatarUrl := fmt.Sprintf("%s/%s/%s", GoogleCloudStoragePrefix, bucketName, avatarImage.Filename)
+	response := map[string]interface{}{"avatarUrl": avatarUrl}
+	ResponseHandler(c, http.StatusOK, response)
 }
