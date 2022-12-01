@@ -45,7 +45,8 @@ func Init() {
 	{
 		user := new(controllers.UserController)
 		userRouter.GET("/:id", user.GetUser)
-		userRouter.POST("/:id", user.UpdateUser)
+		userRouter.POST("/:id/", user.UpdateUser)
+		userRouter.POST("/:id/upload-avatar", user.UploadUserAvatar)
 		userRouter.DELETE("/:email", user.DeleteUser)
 	}
 
