@@ -293,6 +293,13 @@ func (class ClassController) ListMaterials(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, result)
 }
 
-func (class ClassController) DownloadMaterial(c *gin.Context) {
-	
+func (class ClassController) DeleteMaterial(c *gin.Context) {
+	conf := config.GetConfig()
+
+	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	if err := deleteObject(bucketName, c.Query("fileName")); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
 }

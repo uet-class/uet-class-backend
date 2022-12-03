@@ -90,3 +90,28 @@ func listObjects(bucketName string) ([]string, error) {
 	}
 	return objectList, nil
 }
+
+func deleteObject(bucketName string, objectName string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	objectHandle := client.Bucket(bucketName).Object(objectName)
+
+	objectAttributes, err := objectHandle.Attrs(ctx)
+	if err != nil {
+		return err
+	}
+	objectHandle = objectHandle.If(storage.Conditions{GenerationMatch: objectAttributes.Generation})
+
+	if err := objectHandle.Delete(ctx); err != nil {
+		return err
+	}
+	return nil
+}
