@@ -292,3 +292,7 @@ func (class ClassController) ListMaterials(c *gin.Context) {
 	}
 	ResponseHandler(c, http.StatusOK, result)
 }
+
+func (class ClassController) DownloadMaterial(c *gin.Context) {
+	
+}

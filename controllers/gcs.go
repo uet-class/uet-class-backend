@@ -90,3 +90,7 @@ func listObjects(bucketName string) ([]string, error) {
 	}
 	return objectList, nil
 }
+
+func downloadObject(bucketName string, objectName string) multipart.FileHeader {
+
+}
