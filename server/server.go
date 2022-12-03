@@ -55,6 +55,7 @@ func Init() {
 		class := new(controllers.ClassController)
 		classRouter.POST("", class.CreateClass)
 		classRouter.POST("/:id/add-student", class.AddStudent)
+		classRouter.POST("/:id/remove-student", class.RemoveStudent)
 		classRouter.POST("/:id/upload-material", class.UploadMaterial)
 		classRouter.POST("/:id/send-invitation", class.SendInvitation)
 		classRouter.GET("/accept-invitation", class.AcceptInvitation)
