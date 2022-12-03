@@ -58,6 +58,7 @@ func Init() {
 		classRouter.POST("/:id/upload-material", class.UploadMaterial)
 		classRouter.POST("/:id/send-invitation", class.SendInvitation)
 		classRouter.GET("/accept-invitation", class.AcceptInvitation)
+		classRouter.GET("/:id/materials", class.ListMaterials)
 		classRouter.GET("/all", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
 		classRouter.DELETE("/:id", class.DeleteClass)
