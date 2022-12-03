@@ -56,7 +56,7 @@ func getUserByUserEmail(userEmail string) (*models.User, error) {
 	return matchedUser, nil
 }
 
-func getUserBySessionId(sessionId string) (*models.User, error) {
+func GetUserBySessionId(sessionId string) (*models.User, error) {
 	userId, err := getUserIdBySessionId(sessionId)
 	if err != nil {
 		return nil, err

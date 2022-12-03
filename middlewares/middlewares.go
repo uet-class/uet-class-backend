@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/controllers"
 	"github.com/uet-class/uet-class-backend/database"
+	"github.com/uet-class/uet-class-backend/models"
 )
 
 var ctx context.Context = context.Background()
@@ -35,5 +36,26 @@ func AuthRequired(c *gin.Context) {
 		controllers.AbortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
+	c.Next()
+}
+
+func IsAdmin(c *gin.Context) {
+	sessionId, err := c.Cookie("sessionId")
+	if err != nil {
+		controllers.AbortWithError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var reqUser *models.User
+	if reqUser, err = controllers.GetUserBySessionId(sessionId); err != nil {
+		controllers.AbortWithError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !reqUser.IsAdmin {
+		controllers.AbortWithError(c, http.StatusUnauthorized, "You are not administrator")
+		return
+	}
+
 	c.Next()
 }
