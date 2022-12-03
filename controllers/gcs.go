@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/uet-class/uet-class-backend/config"
+	"google.golang.org/api/iterator"
 )
 
 func createBucket(bucketName string) error {
@@ -23,7 +24,7 @@ func createBucket(bucketName string) error {
 	defer cancel()
 
 	newBucket := &storage.BucketAttrs{
-		Location:	conf.GetString("GCS_BUCKET_LOCATION"),
+		Location: conf.GetString("GCS_BUCKET_LOCATION"),
 	}
 
 	bucketHandle := client.Bucket(bucketName)
@@ -62,4 +63,30 @@ func uploadObject(bucketName string, file multipart.FileHeader) error {
 		return err
 	}
 	return nil
+}
+
+func listObjects(bucketName string) ([]string, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	var objectList []string
+	objects := client.Bucket(bucketName).Objects(ctx, nil)
+	for {
+		object, err := objects.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		objectList = append(objectList, object.Name)
+	}
+	return objectList, nil
 }

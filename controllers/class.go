@@ -275,3 +275,20 @@ func (class ClassController) UploadMaterial(c *gin.Context) {
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
+
+func (class ClassController) ListMaterials(c *gin.Context) {
+	conf := config.GetConfig()
+
+	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+
+	materials, err := listObjects(bucketName)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	result := map[string][]string{
+		"files": materials,
+	}
+	ResponseHandler(c, http.StatusOK, result)
+}
