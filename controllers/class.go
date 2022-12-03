@@ -60,7 +60,9 @@ func getUserEmailByInvitationId(invitationId string) (string, error) {
 }
 
 func (class ClassController) CreateClass(c *gin.Context) {
+	conf := config.GetConfig()
 	db := database.GetDatabase()
+
 
 	sessionId, err := c.Cookie("sessionId")
 	if err != nil {
@@ -85,6 +87,13 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	classBucket := fmt.Sprintf("%s-%v", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), reqClass.ID)
+	if err := createBucket(classBucket); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
