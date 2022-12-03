@@ -297,7 +297,7 @@ func (class ClassController) DeleteMaterial(c *gin.Context) {
 	conf := config.GetConfig()
 
 	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
-	if err := deleteObject(bucketName, c.Query("fileName")); err != nil {
+	if err := deleteObject(bucketName, c.Param("file_name")); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
