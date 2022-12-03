@@ -63,7 +63,6 @@ func (class ClassController) CreateClass(c *gin.Context) {
 	conf := config.GetConfig()
 	db := database.GetDatabase()
 
-
 	sessionId, err := c.Cookie("sessionId")
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
@@ -93,7 +92,6 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
@@ -259,4 +257,21 @@ func (class ClassController) AcceptInvitation(c *gin.Context) {
 		return
 	}
 	ResponseHandler(c, http.StatusInternalServerError, "Succeed")
+}
+
+func (class ClassController) UploadMaterial(c *gin.Context) {
+	conf := config.GetConfig()
+
+	uploadedFile, err := c.FormFile("file")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	if err := uploadObject(bucketName, *uploadedFile); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
 }
