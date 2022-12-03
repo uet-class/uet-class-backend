@@ -75,5 +75,15 @@ func Init() {
 		reportRouter.GET("", report.GetUserReports)
 	}
 
+	postRouter := router.Group("api/posts").Use(middlewares.AuthRequired)
+	{
+		post := new(controllers.PostController)
+		postRouter.POST("", post.CreatePost)
+		postRouter.POST("/:id", post.UpdatePost)
+		postRouter.GET("", post.GetAllPosts)
+		postRouter.GET("/:id", post.GetPost)
+		postRouter.DELETE("/:id", post.DeletePost)
+	}
+
 	router.Run(config.GetString("SERVER_PORT"))
 }

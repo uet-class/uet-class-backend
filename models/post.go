@@ -6,10 +6,9 @@ import (
 
 type Post struct {
 	gorm.Model
-	CreatorID    int
-	AttachmentID []Attachment `gorm:"foreignKey:PostID"`
-	Comment      []Comment    `gorm:"foreignKey:PostID"`
-	ClassID      int
-	Content      string
-	Title        string
+	ClassID   int       `gorm:"not null"`
+	CreatorID int       `gorm:"not null"`
+	Title     string    `gorm:"not null"`
+	Content   string    `gorm:"not null"`
+	Comment   []Comment `gorm:"foreignKey:PostID"`
 }
