@@ -127,6 +127,23 @@ func (class ClassController) AddStudent(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
+func (class ClassController) RemoveStudent(c *gin.Context) {
+	db := database.GetDatabase()
+
+	student, err := getUserByUserEmail(c.Query("studentEmail"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	sql := fmt.Sprintf("DELETE FROM student_class WHERE user_id = %v AND class_id = %v", student.ID, c.Param("id"))
+	if err := db.Exec(sql).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
 func (class ClassController) GetUserClasses(c *gin.Context) {
 	db := database.GetDatabase()
 
