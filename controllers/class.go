@@ -60,6 +60,7 @@ func getUserEmailByInvitationId(invitationId string) (string, error) {
 }
 
 func (class ClassController) CreateClass(c *gin.Context) {
+	conf := config.GetConfig()
 	db := database.GetDatabase()
 
 	sessionId, err := c.Cookie("sessionId")
@@ -82,6 +83,12 @@ func (class ClassController) CreateClass(c *gin.Context) {
 
 	reqClass.Teachers = append(reqClass.Teachers, *reqUser)
 	if err := db.Create(&reqClass).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	classBucket := fmt.Sprintf("%s-%v", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), reqClass.ID)
+	if err := createBucket(classBucket); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -250,4 +257,38 @@ func (class ClassController) AcceptInvitation(c *gin.Context) {
 		return
 	}
 	ResponseHandler(c, http.StatusInternalServerError, "Succeed")
+}
+
+func (class ClassController) UploadMaterial(c *gin.Context) {
+	conf := config.GetConfig()
+
+	uploadedFile, err := c.FormFile("file")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	if err := uploadObject(bucketName, *uploadedFile); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
+}
+
+func (class ClassController) ListMaterials(c *gin.Context) {
+	conf := config.GetConfig()
+
+	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+
+	materials, err := listObjects(bucketName)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	result := map[string][]string{
+		"files": materials,
+	}
+	ResponseHandler(c, http.StatusOK, result)
 }
