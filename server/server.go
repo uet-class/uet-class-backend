@@ -62,6 +62,7 @@ func Init() {
 		classRouter.GET("/all", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
 		classRouter.DELETE("/:id", class.DeleteClass)
+		classRouter.DELETE("/:id/materials/:file_name", class.DeleteMaterial)
 
 		classRouter.GET("/all-classes", middlewares.IsAdmin, class.GetAllClasses)
 	}
