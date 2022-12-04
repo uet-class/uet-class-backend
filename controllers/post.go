@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,11 +43,12 @@ func (post PostController) GetAllPosts(c *gin.Context) {
 
 	var allPosts []models.Post
 
-	if err := db.Find(&allPosts).Error; err != nil {
+	sql := fmt.Sprintf("SELECT * FROM posts WHERE class_id = %v", c.Query("classId"))
+	if err := db.Raw(sql).Scan(&allPosts).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ResponseHandler(c, http.StatusOK, allPosts)
+	ResponseHandler(c, http.StatusOK, &allPosts)
 }
 
 func (post PostController) GetPost(c *gin.Context) {
