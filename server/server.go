@@ -85,5 +85,13 @@ func Init() {
 		postRouter.DELETE("/:id", post.DeletePost)
 	}
 
+	commentRouter := router.Group("api/comments").Use(middlewares.AuthRequired)
+	{
+		comment := new(controllers.CommentController)
+		commentRouter.POST("", comment.CreateComment)
+		commentRouter.POST("/:id", comment.UpdateComment)
+		commentRouter.DELETE("/:id", comment.DeleteComment)
+	}
+
 	router.Run(config.GetString("SERVER_PORT"))
 }
