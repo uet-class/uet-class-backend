@@ -10,14 +10,14 @@ import (
 
 type CommentController struct{}
 
-func getCommentFromId(postId string) (*models.Post, error) {
+func getCommentFromId(commentId string) (*models.Comment, error) {
 	db := database.GetDatabase()
 
-	var matchedPost *models.Post
-	if err := db.First(&matchedPost, postId).Error; err != nil {
+	var matchedComment *models.Comment
+	if err := db.First(&matchedComment, commentId).Error; err != nil {
 		return nil, err
 	}
-	return matchedPost, nil
+	return matchedComment, nil
 }
 
 func (comment CommentController) CreateComment(c *gin.Context) {
