@@ -26,3 +26,4 @@ go.work
 config/develop.yaml
 config/product.yaml
 storage/*.json
+.env

@@ -1,11 +1,12 @@
 package server
 
 import (
+	"os"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/controllers"
 	"github.com/uet-class/uet-class-backend/middlewares"
 )
@@ -16,7 +17,6 @@ func getHome(c *gin.Context) {
 
 func Init() {
 	router := gin.Default()
-	config := config.GetConfig()
 
 	corsPolicy := cors.DefaultConfig()
 	corsPolicy.AllowOrigins = []string{
@@ -93,5 +93,5 @@ func Init() {
 		commentRouter.DELETE("/:id", comment.DeleteComment)
 	}
 
-	router.Run(config.GetString("SERVER_PORT"))
+	router.Run(":" + os.Getenv("SERVER_PORT"))
 }

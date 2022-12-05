@@ -3,9 +3,9 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 )
@@ -146,8 +146,8 @@ func (u UserController) UpdateUser(c *gin.Context) {
 
 func (u UserController) UploadUserAvatar(c *gin.Context) {
 	db := database.GetDatabase()
-	conf := config.GetConfig()
-	bucketName := conf.GetString("GCS_BUCKET_AVATARS")
+
+	bucketName := os.Getenv("GCS_BUCKET_AVATARS")
 
 	avatarImage, err := c.FormFile("avatar")
 	if err != nil {
