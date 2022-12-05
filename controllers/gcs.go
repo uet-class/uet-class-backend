@@ -4,15 +4,15 @@ import (
 	"context"
 	"io"
 	"mime/multipart"
+	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/uet-class/uet-class-backend/config"
 	"google.golang.org/api/iterator"
 )
 
 func createBucket(bucketName string) error {
-	conf := config.GetConfig()
+
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -24,11 +24,11 @@ func createBucket(bucketName string) error {
 	defer cancel()
 
 	newBucket := &storage.BucketAttrs{
-		Location: conf.GetString("GCS_BUCKET_LOCATION"),
+		Location: os.Getenv("GCS_BUCKET_LOCATION"),
 	}
 
 	bucketHandle := client.Bucket(bucketName)
-	if err := bucketHandle.Create(ctx, conf.GetString("GCP_PROJECT_ID"), newBucket); err != nil {
+	if err := bucketHandle.Create(ctx, os.Getenv("GCP_PROJECT_ID"), newBucket); err != nil {
 		return err
 	}
 	return nil

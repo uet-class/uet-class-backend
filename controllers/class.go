@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/smtp"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/uet-class/uet-class-backend/config"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 )
@@ -60,7 +60,6 @@ func getUserEmailByInvitationId(invitationId string) (string, error) {
 }
 
 func (class ClassController) CreateClass(c *gin.Context) {
-	conf := config.GetConfig()
 	db := database.GetDatabase()
 
 	sessionId, err := c.Cookie("sessionId")
@@ -87,7 +86,7 @@ func (class ClassController) CreateClass(c *gin.Context) {
 		return
 	}
 
-	classBucket := fmt.Sprintf("%s-%v", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), reqClass.ID)
+	classBucket := fmt.Sprintf("%s-%v", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), reqClass.ID)
 	if err := createBucket(classBucket); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
@@ -217,18 +216,16 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 }
 
 func (class ClassController) SendInvitation(c *gin.Context) {
-	envConfig := config.GetConfig()
-
 	recipients, err := getRecipientsWithInvitationIndex(c)
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	smtpSender := envConfig.GetString("SMTP_EMAIL_USERNAME")
-	smtpPassword := envConfig.GetString("SMTP_EMAIL_PASSWORD")
-	smtpHostname := envConfig.GetString("SMTP_HOSTNAME")
-	smtpPort := envConfig.GetString("SMTP_PORT")
+	smtpSender := os.Getenv("SMTP_EMAIL_USERNAME")
+	smtpPassword := os.Getenv("SMTP_EMAIL_PASSWORD")
+	smtpHostname := os.Getenv("SMTP_HOSTNAME")
+	smtpPort := os.Getenv("SMTP_PORT")
 	smtpAddress := fmt.Sprintf("%s:%s", smtpHostname, smtpPort)
 	auth := smtp.PlainAuth("", smtpSender, smtpPassword, smtpHostname)
 
@@ -236,7 +233,7 @@ func (class ClassController) SendInvitation(c *gin.Context) {
 		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
 		subjectHeader := "Subject: Invitation to a new class!\r\n"
 		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/accept-invitation/?classId=xxx&invitationId=yyy
-		body := fmt.Sprintf("Confirmation link: https://%s/class/accept-invitation/?classId=%s&invitationId=%s\r\n", envConfig.GetString("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
+		body := fmt.Sprintf("Confirmation link: https://%s/class/accept-invitation/?classId=%s&invitationId=%s\r\n", os.Getenv("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
 		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
@@ -277,7 +274,6 @@ func (class ClassController) AcceptInvitation(c *gin.Context) {
 }
 
 func (class ClassController) UploadMaterial(c *gin.Context) {
-	conf := config.GetConfig()
 
 	uploadedFile, err := c.FormFile("file")
 	if err != nil {
@@ -285,7 +281,7 @@ func (class ClassController) UploadMaterial(c *gin.Context) {
 		return
 	}
 
-	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
 	if err := uploadObject(bucketName, *uploadedFile); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err)
 		return
@@ -294,9 +290,8 @@ func (class ClassController) UploadMaterial(c *gin.Context) {
 }
 
 func (class ClassController) ListMaterials(c *gin.Context) {
-	conf := config.GetConfig()
 
-	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
 
 	materials, err := listObjects(bucketName)
 	if err != nil {
@@ -311,9 +306,8 @@ func (class ClassController) ListMaterials(c *gin.Context) {
 }
 
 func (class ClassController) DeleteMaterial(c *gin.Context) {
-	conf := config.GetConfig()
 
-	bucketName := fmt.Sprintf("%s-%s", conf.GetString("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
 	if err := deleteObject(bucketName, c.Param("file_name")); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return

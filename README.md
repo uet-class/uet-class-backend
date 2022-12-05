@@ -5,6 +5,7 @@
 ## Pre-requisite
 
 - `Go` version: `>= 1.19`
+- `Make` (optional, if you want to make use of the Makefile)
 
 ## Usage
 
@@ -14,55 +15,45 @@
   cd uet-class-backend
   ```
 
-- Build the source code:
+- Start server at `http://localhost:8080`:
   ``` bash
-  go build main.go
+  go run main.go
   ```
 
-- Run the binary compiled file:
-  ``` bash
-  ./main
-  ```
-
-  This will start the server at `http://localhost:8080`.
+  OR, you can use `make`:
+    ``` make
+    make
+    ```
 
 ## Environment variables
 
-| Variables           | Usage                           |
-| ------------------- | ------------------------------- |
-| `SERVER_HOST`       | Server hostname                 |
-| `SERVER_PORT`       | Server port number              |
-| `POSTGRES_HOST`     | Database hostname               |
-| `POSTGRES_PORT`     | Database port number            |
-| `POSTGRES_USER`     | Database user to connect        |
-| `POSTGRES_PASSWORD` | Password of the user to connect |
-| `POSTGRES_DATABASE` | Postgres name                   |
-| `REDIS_HOST`        | Redis hostname                  |
-| `REDIS_PORT`        | Redis port number               |
-| `REDIS_PASSWORD`    | Redis password (if any)         |
-| `REDIS_DATABASE`    | Redis database name             |
+``` ini
+# .env
+UC_DOMAIN_NAME=uetclass-dev.duckdns.org
+GCP_PROJECT_ID=uet-class
+GCS_BUCKET_LOCATION=asia
+GCS_BUCKET_CLASS_PREFIX=uc-class
+GCS_BUCKET_AVATARS=uc-avatars
+GOOGLE_APPLICATION_CREDENTIALS=storage/gcs-sa.json
 
+SERVER_HOST=localhost
+SERVER_PORT==8080
 
-These variables should be defined in a YAML file, named `develop.yaml`, and placed in the `config` directory of this repository.
-For the real configuration, please refer to [configuration-management](https://github.com/uet-class/configuration-management) repository.
-Example: 
+POSTGRES_HOST=localhost
+POSTGRES_PORT=15432
+POSTGRES_USER=uc_root
+POSTGRES_PASSWORD=uc_pwd
+POSTGRES_DATABASE=uet_class_dev
 
-``` yaml
-# config/develop.yaml
----
-SERVER_HOST: localhost
-SERVER_PORT: :8080
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=""
+REDIS_DATABASE=0
 
-POSTGRES_HOST: localhost
-POSTGRES_PORT: 15432
-POSTGRES_USER: uc_root
-POSTGRES_PASSWORD: uc_pwd
-POSTGRES_DATABASE: uet_class_dev
-
-REDIS_HOST: localhost
-REDIS_PORT: 6379
-REDIS_PASSWORD: ""
-REDIS_DATABASE: 0
+SMTP_EMAIL_USERNAME=uetclass.notifier@gmail.com
+SMTP_EMAIL_PASSWORD=mokorfpnudghpxaa
+SMTP_HOSTNAME=smtp.gmail.com
+SMTP_PORT=587
 ```
 
 ## Seeding data
