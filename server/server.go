@@ -93,5 +93,5 @@ func Init() {
 		commentRouter.DELETE("/:id", comment.DeleteComment)
 	}
 
-	router.Run(":" + os.Getenv("SERVER_PORT"))
+	router.Run(":" + 	os.Getenv("SERVER_PORT"))
 }
