@@ -270,7 +270,7 @@ func (class ClassController) AcceptInvitation(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ResponseHandler(c, http.StatusInternalServerError, "Succeed")
+	c.String(http.StatusOK, "You have accepted the invitation.")
 }
 
 func (class ClassController) UploadMaterial(c *gin.Context) {
