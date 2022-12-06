@@ -25,7 +25,9 @@ go.work
 # environment variable files
 config/develop.yaml
 config/product.yaml
-storage/*.json
+gcs/*.json
+*.json
 .env
 uet-class-backend
 backend
+main
