@@ -8,17 +8,13 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/uet-class/uet-class-backend/gcs"
 	"google.golang.org/api/iterator"
 )
 
 func createBucket(bucketName string) error {
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
@@ -35,12 +31,8 @@ func createBucket(bucketName string) error {
 }
 
 func uploadObject(bucketName string, file multipart.FileHeader) error {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
 
 	uploadFile, err := file.Open()
 	if err != nil {
@@ -66,12 +58,8 @@ func uploadObject(bucketName string, file multipart.FileHeader) error {
 }
 
 func listObjects(bucketName string) ([]string, error) {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
@@ -92,12 +80,8 @@ func listObjects(bucketName string) ([]string, error) {
 }
 
 func deleteObject(bucketName string, objectName string) error {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()

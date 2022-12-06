@@ -1,11 +1,13 @@
-package storage
+package gcs
 
 import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"cloud.google.com/go/storage"
+	"google.golang.org/api/option"
 )
 
 var storageClient *storage.Client
@@ -15,7 +17,8 @@ var err error
 func InitStorageClient() {
 	ctx = context.Background()
 
-	storageClient, err = storage.NewClient(ctx)
+	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	storageClient, err = storage.NewClient(ctx, option.WithCredentialsFile(serviceAccount))
 	if err != nil {
 		log.Fatal(http.StatusInternalServerError, err)
 	}
