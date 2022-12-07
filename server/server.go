@@ -102,5 +102,12 @@ func Init() {
 		assignmentRouter.POST("/:id/upload-attachment", assignment.UploadAttachment)
 	}
 
+	submissionRouter := router.Group("api/submissions").Use(middlewares.AuthRequired)
+	{
+		submission := new(controllers.SubmissionController)
+		submissionRouter.GET("", submission.GetSubmissions)
+		submissionRouter.POST("/:id/upload", submission.UploadSubmission)
+	}
+
 	router.Run(":" + os.Getenv("SERVER_PORT"))
 }
