@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
@@ -29,6 +30,13 @@ func (post PostController) CreatePost(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	matchedUser, err := getUserByUserId(strconv.Itoa(reqPost.CreatorID))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	reqPost.CreatorName = matchedUser.FullName
 
 	if err := db.Create(&reqPost).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
