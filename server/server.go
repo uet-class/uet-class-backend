@@ -98,6 +98,7 @@ func Init() {
 		assignment := new(controllers.AssignmentController)
 		assignmentRouter.GET("", assignment.GetAssignments)
 		assignmentRouter.POST("", assignment.CreateAssignment)
+		assignmentRouter.POST("/:id/upload-attachment", assignment.UploadAttachment)
 	}
 
 	router.Run(":" + os.Getenv("SERVER_PORT"))

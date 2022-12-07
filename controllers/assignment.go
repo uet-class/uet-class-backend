@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,10 @@ import (
 )
 
 type AssignmentController struct{}
+
+func addPrefix(prefix string, objectName string) string {
+	return prefix + objectName
+}
 
 func (assignment AssignmentController) CreateAssignment(c *gin.Context) {
 	db := database.GetDatabase()
@@ -50,4 +55,20 @@ func (assignment AssignmentController) GetAssignments(c *gin.Context) {
 		return
 	}
 	ResponseHandler(c, http.StatusOK, assignments)
+}
+
+func (assignment AssignmentController) UploadAttachment(c *gin.Context) {
+	uploadedFile, err := c.FormFile("file")
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	bucketName := addPrefix(os.Getenv("GCS_BUCKET_CLASS_PREFIX"), "-"+c.Query("classId"))
+	uploadedFile.Filename = addPrefix(c.Param("id")+"-assignment/", uploadedFile.Filename)
+	if err := uploadObject(bucketName, *uploadedFile); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
 }
