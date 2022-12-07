@@ -97,6 +97,7 @@ func Init() {
 	{
 		assignment := new(controllers.AssignmentController)
 		assignmentRouter.GET("", assignment.GetAssignments)
+		assignmentRouter.GET("/:id", assignment.GetAssignment)
 		assignmentRouter.POST("", assignment.CreateAssignment)
 		assignmentRouter.POST("/:id/upload-attachment", assignment.UploadAttachment)
 	}

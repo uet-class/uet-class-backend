@@ -72,3 +72,29 @@ func (assignment AssignmentController) UploadAttachment(c *gin.Context) {
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
+
+func (assignment AssignmentController) GetAssignment(c *gin.Context) {
+	db := database.GetDatabase()
+
+	var matchedAssignment models.Assignment
+	if err := db.First(&matchedAssignment, c.Param("id")).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	bucketName := addPrefix(os.Getenv("GCS_BUCKET_CLASS_PREFIX"), "-"+c.Query("classId"))
+	subDirPrefix := c.Param("id") + "-assignment/"
+
+	objectList, err := listObjectsWithPrefix(bucketName, subDirPrefix)
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	result := map[string]interface{}{
+		"Assignment": matchedAssignment,
+		"UploadFile": objectList,
+	}
+
+	ResponseHandler(c, http.StatusOK, result)
+}
