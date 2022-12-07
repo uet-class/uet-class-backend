@@ -93,5 +93,13 @@ func Init() {
 		commentRouter.DELETE("/:id", comment.DeleteComment)
 	}
 
+	assignmentRouter := router.Group("api/assignments").Use(middlewares.AuthRequired)
+	{
+		assignment := new(controllers.AssignmentController)
+		// assignmentRouter.POST("", assignment.CreatePost)
+		// assignmentRouter.POST("/:id", assignment.UpdatePost)
+		assignmentRouter.GET("", assignment.GetAssignments)
+	}
+
 	router.Run(":" + 	os.Getenv("SERVER_PORT"))
 }

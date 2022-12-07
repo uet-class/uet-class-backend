@@ -2,7 +2,6 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 type Assignment struct {
@@ -11,7 +10,7 @@ type Assignment struct {
 	CreatorID  int
 	Title      string
 	Content    string
-	DeadLine   time.Time
+	Duedate    string
 	Attachment []Attachment `gorm:"foreignKey:AssignmentID"`
 	Submission []Submission `gorm:"foreignKey:AssignmentID"`
 }
