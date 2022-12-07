@@ -36,7 +36,6 @@ func (assignment AssignmentController) CreateAssignment(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
