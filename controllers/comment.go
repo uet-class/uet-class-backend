@@ -72,7 +72,7 @@ func (comment CommentController) DeleteComment(c *gin.Context) {
 	}
 
 	if err := db.Delete(&matchedComment).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")

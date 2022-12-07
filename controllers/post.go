@@ -110,7 +110,7 @@ func (post PostController) DeletePost(c *gin.Context) {
 	}
 
 	if err := db.Delete(&matchedPost).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")

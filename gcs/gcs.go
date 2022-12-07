@@ -20,7 +20,7 @@ func InitStorageClient() {
 	serviceAccount := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	storageClient, err = storage.NewClient(ctx, option.WithCredentialsFile(serviceAccount))
 	if err != nil {
-		log.Fatal(http.StatusInternalServerError, err)
+		log.Fatal(http.StatusInternalServerError, err.Error())
 	}
 }
 

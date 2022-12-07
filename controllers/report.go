@@ -21,19 +21,19 @@ func (report ReportController) CreateReport(c *gin.Context) {
 
 	sessionId, err := c.Cookie("sessionId")
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	reqUser, err := GetUserBySessionId(sessionId)
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	reqReport.ReporterID = int(reqUser.ID)
 	if err := db.Create(&reqReport).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
@@ -44,7 +44,7 @@ func (report ReportController) GetUserReports(c *gin.Context) {
 	var userReportList []models.Report
 
 	if err := db.Where(&models.Report{ReportType: "user"}).Find(&userReportList).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, userReportList)

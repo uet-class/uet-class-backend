@@ -32,7 +32,7 @@ func Init() *gorm.DB {
 
 	db, err := gorm.Open(postgres.Open(datasource), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	if err = db.AutoMigrate(
@@ -46,7 +46,7 @@ func Init() *gorm.DB {
 		&models.Assignment{},
 		&models.Comment{},
 		&models.Attachment{}); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	return db
@@ -90,10 +90,10 @@ func main() {
 	newClasses := generateClasses(10)
 
 	if err = db.Create(&newUsers).Error; err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
 
 	if err = db.Create(&newClasses).Error; err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
 }

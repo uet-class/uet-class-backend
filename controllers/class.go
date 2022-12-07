@@ -64,13 +64,13 @@ func (class ClassController) CreateClass(c *gin.Context) {
 
 	sessionId, err := c.Cookie("sessionId")
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	reqUser, err := GetUserBySessionId(sessionId)
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -148,7 +148,7 @@ func (class ClassController) GetUserClasses(c *gin.Context) {
 
 	sessionId, err := c.Cookie("sessionId")
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -209,7 +209,7 @@ func (class ClassController) DeleteClass(c *gin.Context) {
 	}
 
 	if err := db.Delete(&matchedClass).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
@@ -237,7 +237,7 @@ func (class ClassController) SendInvitation(c *gin.Context) {
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
 		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
-			ResponseHandler(c, http.StatusInternalServerError, err)
+			ResponseHandler(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 		fmt.Println("Email is sent to: ", recipientEmail)
@@ -283,7 +283,7 @@ func (class ClassController) UploadMaterial(c *gin.Context) {
 
 	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
 	if err := uploadObject(bucketName, *uploadedFile); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")

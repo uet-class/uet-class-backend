@@ -66,7 +66,7 @@ func (assignment AssignmentController) UploadAttachment(c *gin.Context) {
 	bucketName := addPrefix(os.Getenv("GCS_BUCKET_CLASS_PREFIX"), "-"+c.Query("classId"))
 	uploadedFile.Filename = addPrefix(c.Param("id")+"-assignment/", uploadedFile.Filename)
 	if err := uploadObject(bucketName, *uploadedFile); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")

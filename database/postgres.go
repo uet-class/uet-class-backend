@@ -23,7 +23,7 @@ func InitPostgres() {
 		os.Getenv("POSTGRES_DATABASE"))
 
 	if db, err = gorm.Open(postgres.Open(datasource), &gorm.Config{}); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	if err = db.AutoMigrate(
@@ -37,7 +37,7 @@ func InitPostgres() {
 		&models.Assignment{},
 		&models.Comment{},
 		&models.Attachment{}); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 }
 

@@ -23,7 +23,7 @@ func AuthRequired(c *gin.Context) {
 			controllers.AbortWithError(c, http.StatusUnauthorized, "Cookie not found")
 			return
 		}
-		controllers.AbortWithError(c, http.StatusInternalServerError, err)
+		controllers.AbortWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -33,7 +33,7 @@ func AuthRequired(c *gin.Context) {
 			controllers.AbortWithError(c, http.StatusUnauthorized, "Session not found")
 			return
 		}
-		controllers.AbortWithError(c, http.StatusInternalServerError, err)
+		controllers.AbortWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Next()

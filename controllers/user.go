@@ -156,7 +156,7 @@ func (u UserController) UploadUserAvatar(c *gin.Context) {
 	}
 
 	if err := uploadObject(bucketName, *avatarImage); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

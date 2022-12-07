@@ -33,17 +33,17 @@ func (auth AuthController) SignUp(c *gin.Context) {
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if err := db.Where(&models.User{Email: reqUser.Email}).First(&matchedUser).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		if reqUser.Password, err = hashPassword(reqUser.Password); err != nil {
-			ResponseHandler(c, http.StatusUnauthorized, err)
+			ResponseHandler(c, http.StatusUnauthorized, err.Error())
 			return
 		}
 		if err := db.Create(&reqUser).Error; err != nil {
-			ResponseHandler(c, http.StatusInternalServerError, err)
+			ResponseHandler(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
@@ -61,7 +61,7 @@ func (auth AuthController) SignIn(c *gin.Context) {
 	var matchedUser models.User
 
 	if err := c.BindJSON(&reqUser); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -72,20 +72,20 @@ func (auth AuthController) SignIn(c *gin.Context) {
 			sessionId := uuid.NewString()
 			sessionDuration, err := time.ParseDuration("3h")
 			if err != nil {
-				ResponseHandler(c, http.StatusInternalServerError, err)
+				ResponseHandler(c, http.StatusInternalServerError, err.Error())
 				return
 			}
 			// Store and send the session cookie back to the client
 			c.SetCookie("sessionId", sessionId, int(sessionDuration), "/", "", false, true)
 			err = rdb.Set(database.GetRedisContext(), sessionId, matchedUser.ID, sessionDuration).Err()
 			if err != nil {
-				ResponseHandler(c, http.StatusInternalServerError, err)
+				ResponseHandler(c, http.StatusInternalServerError, err.Error())
 				return
 			}
 			response := map[string]interface{}{
 				"sessionId": sessionId,
-				"userId": matchedUser.ID,
-				"isAdmin": matchedUser.IsAdmin,
+				"userId":    matchedUser.ID,
+				"isAdmin":   matchedUser.IsAdmin,
 			}
 			ResponseHandler(c, http.StatusOK, response)
 			return
@@ -100,16 +100,16 @@ func (auth AuthController) SignOut(c *gin.Context) {
 	reqSessionId, err := c.Cookie("sessionId")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			ResponseHandler(c, http.StatusUnauthorized, err)
+			ResponseHandler(c, http.StatusUnauthorized, err.Error())
 			return
 		}
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	_, err = rdb.Del(database.GetRedisContext(), reqSessionId).Result()
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
