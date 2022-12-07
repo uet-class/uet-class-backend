@@ -6,11 +6,12 @@ import (
 
 type Assignment struct {
 	gorm.Model
-	ClassID    int
-	CreatorID  int
-	Title      string
-	Content    string
-	Duedate    string
-	Attachment []Attachment `gorm:"foreignKey:AssignmentID"`
-	Submission []Submission `gorm:"foreignKey:AssignmentID"`
+	ClassID     int    `gorm:"not null"`
+	CreatorID   int    `gorm:"not null"`
+	CreatorName string `gorm:"not null"`
+	Title       string
+	Content     string `gorm:"not null"`
+	Duedate     string
+	Attachment  []Attachment `gorm:"foreignKey:AssignmentID"`
+	Submission  []Submission `gorm:"foreignKey:AssignmentID"`
 }

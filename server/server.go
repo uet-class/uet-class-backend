@@ -96,10 +96,18 @@ func Init() {
 	assignmentRouter := router.Group("api/assignments").Use(middlewares.AuthRequired)
 	{
 		assignment := new(controllers.AssignmentController)
-		// assignmentRouter.POST("", assignment.CreatePost)
-		// assignmentRouter.POST("/:id", assignment.UpdatePost)
 		assignmentRouter.GET("", assignment.GetAssignments)
+		assignmentRouter.GET("/:id", assignment.GetAssignment)
+		assignmentRouter.POST("", assignment.CreateAssignment)
+		assignmentRouter.POST("/:id/upload-attachment", assignment.UploadAttachment)
 	}
 
-	router.Run(":" + 	os.Getenv("SERVER_PORT"))
+	submissionRouter := router.Group("api/submissions").Use(middlewares.AuthRequired)
+	{
+		submission := new(controllers.SubmissionController)
+		submissionRouter.GET("", submission.GetSubmissions)
+		submissionRouter.POST("/:id/upload", submission.UploadSubmission)
+	}
+
+	router.Run(":" + os.Getenv("SERVER_PORT"))
 }

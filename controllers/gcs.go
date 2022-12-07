@@ -79,6 +79,30 @@ func listObjects(bucketName string) ([]string, error) {
 	return objectList, nil
 }
 
+func listObjectsWithPrefix(bucketName, prefix string) ([]string, error) {
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	var objectList []string
+	objects := client.Bucket(bucketName).Objects(ctx, &storage.Query{
+		Prefix:    prefix,
+	})
+	for {
+		object, err := objects.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		objectList = append(objectList, object.Name)
+	}
+	return objectList, nil
+}
+
 func deleteObject(bucketName string, objectName string) error {
 	ctx := gcs.GetStorageClientContext()
 	client := gcs.GetStorageClient()
