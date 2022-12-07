@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,35 +14,24 @@ type AssignmentController struct{}
 func (assignment AssignmentController) CreateAssignment(c *gin.Context) {
 	db := database.GetDatabase()
 
-	sessionId, err := c.Cookie("sessionId")
+	var reqAssignment models.Assignment
+	if err := c.BindJSON(&reqAssignment); err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	matchedUser, err := getUserByUserId(strconv.Itoa(reqAssignment.CreatorID))
 	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	reqAssignment.CreatorName = matchedUser.FullName
 
-	reqUser, err := GetUserBySessionId(sessionId)
-	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	var reqClass models.Class
-	if err := c.BindJSON(&reqClass); err != nil {
+	if err := db.Create(&reqAssignment).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	reqClass.Teachers = append(reqClass.Teachers, *reqUser)
-	if err := db.Create(&reqClass).Error; err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	classBucket := fmt.Sprintf("%s-%v", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), reqClass.ID)
-	if err := createBucket(classBucket); err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
-	}
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 

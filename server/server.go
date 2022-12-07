@@ -96,10 +96,9 @@ func Init() {
 	assignmentRouter := router.Group("api/assignments").Use(middlewares.AuthRequired)
 	{
 		assignment := new(controllers.AssignmentController)
-		// assignmentRouter.POST("", assignment.CreatePost)
-		// assignmentRouter.POST("/:id", assignment.UpdatePost)
 		assignmentRouter.GET("", assignment.GetAssignments)
+		assignmentRouter.POST("", assignment.CreateAssignment)
 	}
 
-	router.Run(":" + 	os.Getenv("SERVER_PORT"))
+	router.Run(":" + os.Getenv("SERVER_PORT"))
 }
