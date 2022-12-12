@@ -309,11 +309,7 @@ func (class ClassController) ListMaterials(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	result := map[string][]string{
-		"files": materials,
-	}
-	ResponseHandler(c, http.StatusOK, result)
+	ResponseHandler(c, http.StatusOK, materials)
 }
 
 func (class ClassController) DeleteMaterial(c *gin.Context) {
