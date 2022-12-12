@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"time"
@@ -125,18 +126,50 @@ func deleteObject(bucketName string, objectName string) error {
 	return nil
 }
 
-func getFileReader(bucketName, objectName string) (*storage.Reader, error) {
-	ctx := gcs.GetStorageClientContext()
-	client := gcs.GetStorageClient()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
+func getFileURL(bucketName, objectName string) (string, error) {
+	fmt.Println(os.Getenv("SERVER_STORAGE_PEM_LOCATION"))
+	pkey, err := ioutil.ReadFile(os.Getenv("SERVER_STORAGE_PEM_LOCATION"))
+	if err != nil {
+		return "", nil
+	}
 
 	fmt.Println(bucketName)
 	fmt.Println(objectName)
-	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+
+	url, err := storage.SignedURL(bucketName, objectName, &storage.SignedURLOptions{
+		GoogleAccessID: "uc-backend-sa@uet-class.iam.gserviceaccount.com",
+		PrivateKey:     pkey,
+		Method:         "GET",
+		Expires:        time.Now().Add(48 * time.Hour),
+	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return rc, nil
+	return url, nil
+
+	// ctx := gcs.GetStorageClientContext()
+	// client := gcs.GetStorageClient()
+
+	// ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	// defer cancel()
+
+	// rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer rc.Close()
+
+	// newFile, err := os.Create(os.Getenv("SERVER_STORAGE_LOCATION") + "/" + r)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// if _, err := io.Copy(newFile, rc); err != nil {
+	// 	return err
+	// }
+
+	// if err = f.Close(); err != nil {
+	// 	return err
+	// }
+	// return  nil
 }
