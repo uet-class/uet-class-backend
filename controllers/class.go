@@ -289,6 +289,28 @@ func (class ClassController) UploadMaterial(c *gin.Context) {
 	ResponseHandler(c, http.StatusOK, "Succeed")
 }
 
+func (class ClassController) DownloadMaterial(c *gin.Context) {
+	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))
+	fileReader, err := getFileReader(bucketName, c.Query("objectName"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer fileReader.Close()
+
+	fmt.Println(bucketName)
+
+	extraHeaderVal := fmt.Sprintf("attachment; filename=%s", c.Query("objectName"))
+	extraHeaders := map[string]string{
+		"Content-Disposition": extraHeaderVal,
+	}
+	contentType := fileReader.Attrs.ContentType
+	contentLength := fileReader.Attrs.Size 
+	
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, fileReader, extraHeaders)
+}
+
 func (class ClassController) ListMaterials(c *gin.Context) {
 
 	bucketName := fmt.Sprintf("%s-%s", os.Getenv("GCS_BUCKET_CLASS_PREFIX"), c.Param("id"))

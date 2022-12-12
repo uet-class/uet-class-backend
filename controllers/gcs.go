@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -88,7 +89,7 @@ func listObjectsWithPrefix(bucketName, prefix string) ([]string, error) {
 
 	var objectList []string
 	objects := client.Bucket(bucketName).Objects(ctx, &storage.Query{
-		Prefix:    prefix,
+		Prefix: prefix,
 	})
 	for {
 		object, err := objects.Next()
@@ -122,4 +123,20 @@ func deleteObject(bucketName string, objectName string) error {
 		return err
 	}
 	return nil
+}
+
+func getFileReader(bucketName, objectName string) (*storage.Reader, error) {
+	ctx := gcs.GetStorageClientContext()
+	client := gcs.GetStorageClient()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	fmt.Println(bucketName)
+	fmt.Println(objectName)
+	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return rc, nil
 }

@@ -62,6 +62,7 @@ func Init() {
 		classRouter.GET("/:id/materials", class.ListMaterials)
 		classRouter.GET("/all", class.GetUserClasses)
 		classRouter.GET("/:id", class.GetClass)
+		classRouter.GET("/:id/download-material", class.DownloadMaterial)
 		classRouter.DELETE("/:id", class.DeleteClass)
 		classRouter.DELETE("/:id/materials/:file_name", class.DeleteMaterial)
 
