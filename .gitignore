@@ -27,6 +27,7 @@ config/develop.yaml
 config/product.yaml
 gcs/*.json
 *.json
+*.pem
 .env
 uet-class-backend
 backend
