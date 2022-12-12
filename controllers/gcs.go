@@ -84,14 +84,14 @@ func listObjects(bucketName string) ([]interface{}, error) {
 	return files, nil
 }
 
-func listObjectsWithPrefix(bucketName, prefix string) ([]string, error) {
+func listObjectsWithPrefix(bucketName, prefix string) ([]interface{}, error) {
 	ctx := gcs.GetStorageClientContext()
 	client := gcs.GetStorageClient()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	var objectList []string
+	var files []interface{}
 	objects := client.Bucket(bucketName).Objects(ctx, &storage.Query{
 		Prefix: prefix,
 	})
@@ -103,9 +103,14 @@ func listObjectsWithPrefix(bucketName, prefix string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		objectList = append(objectList, object.Name)
+		file := map[string]string{
+			"fileName":  object.Name,
+			"createdAt": object.Created.String(),
+			"prefix":    object.Prefix,
+		}
+		files = append(files, file)
 	}
-	return objectList, nil
+	return files, nil
 }
 
 func deleteObject(bucketName string, objectName string) error {

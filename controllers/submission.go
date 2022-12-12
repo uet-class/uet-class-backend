@@ -20,6 +20,7 @@ func (submission SubmissionController) UploadSubmission(c *gin.Context) {
 	assignmentPrefix := c.Query("assignmentId") + "-assignment/"
 	submissionPrefix := "submissions/"
 	uploadedFile.Filename = addPrefix(assignmentPrefix+submissionPrefix, uploadedFile.Filename)
+	
 	if err := uploadObject(bucketName, *uploadedFile); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
