@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/uet-class/uet-class-backend/database"
 	"github.com/uet-class/uet-class-backend/models"
 )
@@ -154,7 +155,7 @@ func (u UserController) UploadUserAvatar(c *gin.Context) {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	avatarImage.Filename = uuid.NewString()
 	if err := uploadObject(bucketName, *avatarImage); err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
