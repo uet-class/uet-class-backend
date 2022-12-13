@@ -107,7 +107,7 @@ func Init() {
 	{
 		submission := new(controllers.SubmissionController)
 		submissionRouter.GET("", submission.GetSubmissions)
-		submissionRouter.POST("/:id/upload", submission.UploadSubmission)
+		submissionRouter.POST("/upload", submission.UploadSubmission)
 	}
 
 	router.Run(":" + os.Getenv("SERVER_PORT"))
