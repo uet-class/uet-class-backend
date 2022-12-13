@@ -231,9 +231,9 @@ func (class ClassController) SendInvitation(c *gin.Context) {
 
 	for invitationIndex, recipientEmail := range recipients {
 		recipientHeader := fmt.Sprintf("To: %s\r\n", recipientEmail)
-		subjectHeader := "Subject: Invitation to a new class!\r\n"
+		subjectHeader := "Subject: Thư mời tham gia lớp học!\r\n"
 		// Confirmation link should  have format: https://uetclass-dev.duckdns.org/class/accept-invitation/?classId=xxx&invitationId=yyy
-		body := fmt.Sprintf("Confirmation link: https://%s/api/class/accept-invitation/?classId=%s&invitationId=%s\r\n", os.Getenv("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
+		body := fmt.Sprintf("Tham gia lớp qua đường dẫn: https://%s/api/class/accept-invitation/?classId=%s&invitationId=%s\r\n", os.Getenv("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
 		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
