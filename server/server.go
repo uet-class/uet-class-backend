@@ -106,7 +106,8 @@ func Init() {
 	submissionRouter := router.Group("api/submissions").Use(middlewares.AuthRequired)
 	{
 		submission := new(controllers.SubmissionController)
-		submissionRouter.GET("", submission.GetSubmissions)
+		submissionRouter.GET("/all", submission.GetSubmissions)
+		submissionRouter.GET("", submission.GetSubmission)
 		submissionRouter.POST("/upload", submission.UploadSubmission)
 	}
 

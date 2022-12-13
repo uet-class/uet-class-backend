@@ -76,3 +76,14 @@ func (submission SubmissionController) GetSubmissions(c *gin.Context) {
 	}
 	ResponseHandler(c, http.StatusOK, matchedSubmissions)
 }
+
+func (submission SubmissionController) GetSubmission(c *gin.Context) {
+	db := database.GetDatabase()
+
+	var matchedSubmissions []models.Submission
+	if err := db.Raw("SELECT bucket_name, file_name, creator_name FROM submissions WHERE class_id=? AND assignment_id=? AND creator_id=?", c.Query("classId"), c.Query("assignmentId"), c.Query("userId")).Scan(&matchedSubmissions).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, matchedSubmissions)
+}
