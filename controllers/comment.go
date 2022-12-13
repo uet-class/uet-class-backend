@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
@@ -29,6 +30,14 @@ func (comment CommentController) CreateComment(c *gin.Context) {
 		return
 	}
 
+
+	reqUser, err := getUserByUserId(strconv.Itoa(reqComment.CreatorID))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return 
+	}
+
+	reqComment.CreatorName = reqUser.FullName
 	if err := db.Create(&reqComment).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
