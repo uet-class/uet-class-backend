@@ -27,6 +27,12 @@ func (submission SubmissionController) UploadSubmission(c *gin.Context) {
 		return
 	}
 
+	classId, err := strconv.Atoi(c.Query("classId"))
+	if err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	reqUser, err := getUserByUserId(c.Query("creatorId"))
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
@@ -39,9 +45,11 @@ func (submission SubmissionController) UploadSubmission(c *gin.Context) {
 	uploadedFile.Filename = addPrefix(assignmentPrefix+submissionPrefix, uploadedFile.Filename)
 
 	newSubmission := models.Submission{
+		ClassID:      uint(classId),
 		AssignmentID: uint(assignmentId),
 		CreatorID:    reqUser.ID,
 		CreatorName:  reqUser.FullName,
+		BucketName:   bucketName,
 		FileName:     uploadedFile.Filename,
 	}
 
@@ -59,14 +67,12 @@ func (submission SubmissionController) UploadSubmission(c *gin.Context) {
 }
 
 func (submission SubmissionController) GetSubmissions(c *gin.Context) {
-	bucketName := addPrefix(os.Getenv("GCS_BUCKET_CLASS_PREFIX"), "-"+c.Query("classId"))
-	assignmentPrefix := c.Query("assignmentId") + "-assignment/"
-	submissionPrefix := "submissions/"
+	db := database.GetDatabase()
 
-	submissions, err := listObjectsWithPrefix(bucketName, assignmentPrefix+submissionPrefix)
-	if err != nil {
+	var matchedSubmissions []models.Submission
+	if err := db.Raw("SELECT bucket_name, file_name, creator_name FROM submissions WHERE class_id=? AND assignment_id=?", c.Query("classId"), c.Query("assignmentId")).Scan(&matchedSubmissions).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ResponseHandler(c, http.StatusOK, submissions)
+	ResponseHandler(c, http.StatusOK, matchedSubmissions)
 }
