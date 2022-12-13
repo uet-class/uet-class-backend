@@ -236,7 +236,7 @@ func (class ClassController) SendInvitation(c *gin.Context) {
 		body := fmt.Sprintf("Tham gia lớp qua đường dẫn: https://%s/api/class/accept-invitation/?classId=%s&invitationId=%s\r\n", os.Getenv("UC_DOMAIN_NAME"), c.Param("id"), invitationIndex)
 
 		message := []byte(recipientHeader + subjectHeader + "\r\n" + body)
-		if err := smtp.SendMail(smtpAddress, auth, smtpSender, []string{recipientEmail}, message); err != nil {
+		if err := smtp.SendMail(smtpAddress, auth, "UET Class", []string{recipientEmail}, message); err != nil {
 			ResponseHandler(c, http.StatusInternalServerError, err.Error())
 			return
 		}
