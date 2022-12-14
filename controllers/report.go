@@ -49,3 +49,19 @@ func (report ReportController) GetUserReports(c *gin.Context) {
 	}
 	ResponseHandler(c, http.StatusOK, userReportList)
 }
+
+func (report ReportController) DeleteUserReport(c *gin.Context) {
+	db := database.GetDatabase()
+
+	var matchedReport models.Report
+	if err := db.First(&matchedReport, c.Param("id")).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := db.Delete(&matchedReport).Error; err != nil {
+		ResponseHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ResponseHandler(c, http.StatusOK, "Succeed")
+}

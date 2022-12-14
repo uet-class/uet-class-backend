@@ -74,6 +74,7 @@ func Init() {
 		report := new(controllers.ReportController)
 		reportRouter.POST("", report.CreateReport)
 		reportRouter.GET("", report.GetUserReports)
+		reportRouter.DELETE("/:id", report.DeleteUserReport)
 	}
 
 	postRouter := router.Group("api/posts").Use(middlewares.AuthRequired)
