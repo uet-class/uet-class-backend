@@ -82,12 +82,11 @@ func (auth AuthController) SignIn(c *gin.Context) {
 				ResponseHandler(c, http.StatusInternalServerError, err.Error())
 				return
 			}
-			response := map[string]interface{}{
-				"sessionId": sessionId,
+			result := map[string]interface{}{
 				"userId":    matchedUser.ID,
 				"isAdmin":   matchedUser.IsAdmin,
 			}
-			ResponseHandler(c, http.StatusOK, response)
+			ResponseHandler(c, http.StatusOK, result)
 			return
 		}
 	}

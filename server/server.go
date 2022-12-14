@@ -69,7 +69,7 @@ func Init() {
 		classRouter.GET("/all-classes", middlewares.IsAdmin, class.GetAllClasses)
 	}
 
-	reportRouter := router.Group("api/report").Use(middlewares.AuthRequired)
+	reportRouter := router.Group("api/reports").Use(middlewares.AuthRequired)
 	{
 		report := new(controllers.ReportController)
 		reportRouter.POST("", report.CreateReport)

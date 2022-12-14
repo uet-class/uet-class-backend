@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/uet-class/uet-class-backend/database"
@@ -19,19 +20,22 @@ func (report ReportController) CreateReport(c *gin.Context) {
 		return
 	}
 
-	sessionId, err := c.Cookie("sessionId")
+	reqUser, err := getUserByUserId(strconv.Itoa(reqReport.ReporterID))
 	if err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	reqUser, err := GetUserBySessionId(sessionId)
-	if err != nil {
-		ResponseHandler(c, http.StatusInternalServerError, err.Error())
-		return
+	if reqReport.ReportType == "user" {
+		reportedUser, err := getUserByUserId(strconv.Itoa(reqReport.ReportObjectID))
+		if err != nil {
+			ResponseHandler(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		reqReport.ReportObjectName = reportedUser.FullName
 	}
 
-	reqReport.ReporterID = int(reqUser.ID)
+	reqReport.ReporterName = reqUser.FullName
 	if err := db.Create(&reqReport).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return

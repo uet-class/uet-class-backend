@@ -7,8 +7,10 @@ import (
 // A Report has one reportType, ReportTypeID is the foreign key
 type Report struct {
 	gorm.Model
-	ReportObjectID int
-	ReporterID     int
-	ReportType     string
-	Message        string
+	ReportObjectID   int
+	ReportObjectName string
+	ReporterID       int
+	ReporterName     string
+	ReportType       string
+	Message          string
 }
