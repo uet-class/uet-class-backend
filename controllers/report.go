@@ -33,9 +33,11 @@ func (report ReportController) CreateReport(c *gin.Context) {
 			return
 		}
 		reqReport.ReportObjectName = reportedUser.FullName
+		reqReport.ReportObjectContact = reportedUser.Email
 	}
 
 	reqReport.ReporterName = reqUser.FullName
+	reqReport.ReporterEmail = reqUser.Email
 	if err := db.Create(&reqReport).Error; err != nil {
 		ResponseHandler(c, http.StatusInternalServerError, err.Error())
 		return
