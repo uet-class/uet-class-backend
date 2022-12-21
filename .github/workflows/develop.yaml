@@ -1,0 +1,55 @@
+name: Develop pipeline
+
+on:
+  push:
+    branches:
+      - "develop"
+  pull_request:
+    branches:    
+      - "feature/**"
+
+env:
+  REGISTRY_URL: thainm
+  IMAGE_NAME: uc-backend
+  BRANCH_NAME: develop
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Authenticating with Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login docker.io --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Building Docker image
+        run: |
+          docker build -t ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest .
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
+
+      - name: Pushing the built image to Docker Hub
+        run: |
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-latest
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:$BRANCH_NAME-$GITHUB_SHA
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Creating private key from secret
+        run: echo "${{ secrets.GCP_DEVELOP_SERVER_PRIVATE_KEY }}" > github-actions.pem
+
+      - name: Changing permission of the private key
+        run: chmod 400 github-actions.pem
+
+      - name: Establishing SSH connection
+        run: ssh -o StrictHostKeyChecking=no -vi github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; ls -la"
+
+      - name: Checking out new repo version
+        run: ssh -i github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management; git pull origin main"
+
+      - name: Pulling new Docker image
+        run: ssh -i github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management/; docker compose -f docker-compose-app.yaml pull"
+
+      - name: Deploying new Docker container
+        run: ssh -i github-actions.pem ${{ secrets.GCP_DEVELOP_SERVER_USER }}@${{ secrets.GCP_DEVELOP_SERVER_HOST }} "cd configuration-management/; docker compose -f docker-compose-app.yaml up -d"

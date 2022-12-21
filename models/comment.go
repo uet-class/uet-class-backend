@@ -1,15 +1,11 @@
 package models
 
-import (
-	"gorm.io/gorm"
-	"time"
-)
+import "gorm.io/gorm"
 
 type Comment struct {
 	gorm.Model
-	ID        int
-	CreatorID int
-	PostID    int
-	Content   string
-	CreatedAt time.Time
+	CreatorID   int
+	CreatorName string
+	PostID      int
+	Content     string
 }

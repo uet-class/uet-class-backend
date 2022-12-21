@@ -5,10 +5,9 @@
 ## Pre-requisite
 
 - `Go` version: `>= 1.19`
+- `Make` (optional, if you want to make use of the Makefile)
 
 ## Usage
-
-__NOTE: These steps below are instructions for Linux environment. If you are using another type of OSes (e.g Windows, MacOS, ...), please just use these steps as references.__
 
 - Clone the repository and `cd` inside:
   ``` bash
@@ -16,14 +15,52 @@ __NOTE: These steps below are instructions for Linux environment. If you are usi
   cd uet-class-backend
   ```
 
-- Build the source code:
+- Start server at `http://localhost:8080`:
   ``` bash
-  go build main.go
+  go run main.go
   ```
 
-- Run the binary compiled file:
-  ``` bash
-  ./main
-  ```
+  OR, you can use `make`:
+    ``` make
+    make
+    ```
 
-  This will start the server at `http://localhost:8080`.
+## Environment variables
+
+``` ini
+# .env
+UC_DOMAIN_NAME=uetclass-dev.duckdns.org
+GCP_PROJECT_ID=uet-class
+GCS_BUCKET_LOCATION=asia
+GCS_BUCKET_CLASS_PREFIX=uc-class
+GCS_BUCKET_AVATARS=uc-avatars
+GOOGLE_APPLICATION_CREDENTIALS=storage/gcs-sa.json
+
+SERVER_HOST=localhost
+SERVER_PORT==8080
+
+POSTGRES_HOST=localhost
+POSTGRES_PORT=15432
+POSTGRES_USER=uc_root
+POSTGRES_PASSWORD=xxx
+POSTGRES_DATABASE=uet_class_dev
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=""
+REDIS_DATABASE=0
+
+SMTP_EMAIL_USERNAME=xxx@gmail.com
+SMTP_EMAIL_PASSWORD=xxx
+SMTP_HOSTNAME=smtp.gmail.com
+SMTP_PORT=587
+```
+
+## Seeding data
+
+The seeding script is placed in `seed/` directory of this repo.
+
+``` bash
+go run seed/seed.go
+```
+## To-do

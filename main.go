@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/uet-class/uet-class-backend/config"
-	// "github.com/uet-class/uet-class-backend/db"
+	"github.com/uet-class/uet-class-backend/database"
+	"github.com/uet-class/uet-class-backend/gcs"
 	"github.com/uet-class/uet-class-backend/server"
 )
 
 func main() {
-	config.Init()
-	// db.Init()
+	gcs.InitStorageClient()
+	database.InitPostgres()
+	database.InitRedis()
 	server.Init()
 }

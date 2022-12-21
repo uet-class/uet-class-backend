@@ -2,15 +2,17 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
+// A Report has one reportType, ReportTypeID is the foreign key
 type Report struct {
 	gorm.Model
-	ID             int
-	ReportTypeID   int
-	reportObjectID int
-	CreatedAt      time.Time
-	Message        string
-	ReporterID     int
+	ReportObjectID      int
+	ReportObjectName    string
+	ReportObjectContact string
+	ReporterID          int
+	ReporterName        string
+	ReporterEmail       string
+	ReportType          string
+	Message             string
 }
